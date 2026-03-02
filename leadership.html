@@ -1,1642 +1,1752 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Regiment — Leadership Dashboard</title>
-
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-
-    :root{
-      --primary-dark:#1a3a2a;
-      --primary-green:#2d5a3d;
-      --accent-gold:#d4af37;
-      --accent-light-gold:#e8c547;
-
-      --text-light:#e8e8e8;
-      --text-muted:#a8a8a8;
-
-      --bg-dark:#0f1f18;
-      --bg-darker:#0a1410;
-
-      --border-color:#3d6d4d;
-
-      --success:#4ade80;
-      --warning:#facc15;
-      --danger:#ef4444;
-      --info:#3b82f6;
-    }
-
-    body{
-      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color:var(--bg-darker);
-      color:var(--text-light);
-      line-height:1.6;
-      height:100vh;
-      overflow:hidden;
-    }
-
-    .container{
-      display:flex;
-      height:100vh;
-      overflow:hidden;
-    }
-
-    /* Sidebar */
-    .sidebar{
-      width:280px;
-      background:linear-gradient(135deg,var(--primary-dark) 0%, var(--primary-green) 100%);
-      border-right:2px solid var(--accent-gold);
-      padding:20px;
-      overflow-y:auto;
-      box-shadow:2px 0 10px rgba(0,0,0,0.5);
-    }
-
-    .logo{
-      display:flex;
-      align-items:center;
-      margin-bottom:18px;
-      padding-bottom:16px;
-      border-bottom:2px solid var(--accent-gold);
-      gap:12px;
-    }
-
-    .logo-icon{
-      width:40px;height:40px;
-      background:var(--accent-gold);
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:bold;
-      color:var(--primary-dark);
-      font-size:20px;
-      flex-shrink:0;
-    }
-
-    .logo-text-wrap{display:flex;flex-direction:column;line-height:1.1;}
-    .logo-text{
-      font-size:18px;
-      font-weight:bold;
-      color:var(--accent-gold);
-      letter-spacing:0.5px;
-    }
-    .logo-sub{
-      font-size:11px;
-      color:rgba(232,232,232,0.8);
-      letter-spacing:1px;
-      text-transform:uppercase;
-      margin-top:3px;
-    }
-
-    .confidential{
-      margin:0 0 18px 0;
-      padding:10px 12px;
-      border-radius:8px;
-      border-left:4px solid var(--danger);
-      background:rgba(239,68,68,0.10);
-      color:#ffb4b4;
-      font-size:12px;
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-    }
-
-    .nav-section{ margin-bottom:22px; }
-    .nav-section-title{
-      font-size:12px;
-      font-weight:bold;
-      color:var(--accent-light-gold);
-      text-transform:uppercase;
-      letter-spacing:1px;
-      margin-bottom:10px;
-      padding-left:10px;
-    }
-
-    .nav-item{
-      padding:12px 15px;
-      margin-bottom:8px;
-      border-radius:6px;
-      cursor:pointer;
-      transition:all 0.25s ease;
-      display:flex;
-      align-items:center;
-      color:var(--text-light);
-      border-left:3px solid transparent;
-      user-select:none;
-    }
-
-    .nav-item:hover{
-      background-color:rgba(212,175,55,0.10);
-      border-left-color:var(--accent-gold);
-      padding-left:20px;
-    }
-
-    .nav-item.active{
-      background-color:rgba(212,175,55,0.18);
-      border-left-color:var(--accent-gold);
-      color:var(--accent-gold);
-      font-weight:700;
-    }
-
-    .nav-icon{
-      width:20px;height:20px;
-      margin-right:12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-shrink:0;
-    }
-
-    .nav-badge{
-      margin-left:auto;
-      background:rgba(239,68,68,0.95);
-      color:#fff;
-      padding:2px 10px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:0.5px;
-    }
-
-    .sidebar-footer{
-      margin-top:18px;
-      padding-top:16px;
-      border-top:1px solid rgba(232,197,71,0.25);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .sidebar-links{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-
-    .chip-link{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(212,175,55,0.5);
-      background:rgba(0,0,0,0.18);
-      color:var(--text-light);
-      text-decoration:none;
-      font-size:11px;
-      font-weight:700;
-      letter-spacing:0.4px;
-      transition:all 0.2s ease;
-      white-space:nowrap;
-    }
-    .chip-link:hover{ background:rgba(212,175,55,0.12); transform:translateY(-1px); }
-
-    /* Main */
-    .main-content{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      background-color:var(--bg-dark);
-      overflow:hidden;
-    }
-
-    .header{
-      background:linear-gradient(90deg,var(--primary-dark) 0%, var(--primary-green) 100%);
-      border-bottom:2px solid var(--accent-gold);
-      padding:18px 24px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:16px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.5);
-      flex-wrap:wrap;
-    }
-
-    .header-left{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-width:240px;
-    }
-
-    .header-title{
-      font-size:22px;
-      font-weight:900;
-      color:var(--accent-gold);
-      letter-spacing:0.8px;
-    }
-
-    .header-sub{
-      font-size:12px;
-      color:rgba(232,232,232,0.75);
-      letter-spacing:0.8px;
-      text-transform:uppercase;
-    }
-
-    .header-info{
-      display:flex;
-      gap:14px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      background:rgba(0,0,0,0.22);
-      border:1px solid rgba(212,175,55,0.35);
-      font-size:12px;
-      color:var(--text-light);
-      white-space:nowrap;
-    }
-
-    .search{
-      position:relative;
-      min-width:260px;
-      max-width:420px;
-      flex:1;
-    }
-    .search input{
-      width:100%;
-      padding:10px 12px 10px 34px;
-      background-color:rgba(0,0,0,0.30);
-      border:1px solid var(--border-color);
-      border-radius:6px;
-      color:var(--text-light);
-      transition:all 0.25s ease;
-      font-size:13px;
-    }
-    .search input:focus{
-      outline:none;
-      border-color:var(--accent-gold);
-      box-shadow:0 0 10px rgba(212,175,55,0.2);
-    }
-    .search .mag{
-      position:absolute;
-      left:10px;
-      top:50%;
-      transform:translateY(-50%);
-      opacity:0.8;
-      color:var(--text-muted);
-      font-size:14px;
-      pointer-events:none;
-    }
-
-    .user-profile{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .user-avatar{
-      width:40px;height:40px;
-      background:var(--accent-gold);
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:var(--primary-dark);
-      font-weight:900;
-      letter-spacing:0.5px;
-    }
-    .user-name{
-      color:var(--text-light);
-      font-size:13px;
-      font-weight:700;
-    }
-    .user-role{
-      font-size:11px;
-      color:rgba(232,232,232,0.75);
-      text-transform:uppercase;
-      letter-spacing:0.8px;
-      margin-top:2px;
-    }
-
-    .content{
-      flex:1;
-      overflow-y:auto;
-      padding:22px;
-    }
-
-    .page{ display:none; }
-    .page.active{
-      display:block;
-      animation:fadeIn 0.25s ease;
-    }
-
-    @keyframes fadeIn{
-      from{opacity:0; transform:translateY(10px);}
-      to{opacity:1; transform:translateY(0);}
-    }
-
-    .dashboard-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-      gap:18px;
-      margin-bottom:18px;
-    }
-
-    .card{
-      background:linear-gradient(135deg, var(--primary-dark) 0%, rgba(45,90,61,0.50) 100%);
-      border:1px solid var(--border-color);
-      border-radius:8px;
-      padding:18px;
-      box-shadow:0 4px 15px rgba(0,0,0,0.3);
-      transition:all 0.25s ease;
-    }
-    .card:hover{
-      border-color:var(--accent-gold);
-      box-shadow:0 6px 20px rgba(212,175,55,0.2);
-      transform:translateY(-2px);
-    }
-
-    .card-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-bottom:12px;
-      padding-bottom:10px;
-      border-bottom:1px solid var(--border-color);
-    }
-
-    .card-title{
-      font-size:15px;
-      font-weight:900;
-      color:var(--accent-gold);
-      letter-spacing:0.6px;
-      text-transform:uppercase;
-    }
-
-    .card-badge{
-      background:var(--accent-gold);
-      color:var(--primary-dark);
-      padding:4px 12px;
-      border-radius:20px;
-      font-size:12px;
-      font-weight:900;
-      white-space:nowrap;
-    }
-
-    .stat-value{
-      font-size:32px;
-      font-weight:900;
-      color:var(--accent-light-gold);
-      margin:8px 0;
-      letter-spacing:0.6px;
-    }
-
-    .stat-label{
-      font-size:12px;
-      color:var(--text-muted);
-      text-transform:uppercase;
-      letter-spacing:1px;
-    }
-
-    .progress-bar{
-      width:100%;
-      height:8px;
-      background-color:rgba(0,0,0,0.3);
-      border-radius:4px;
-      overflow:hidden;
-      margin-top:10px;
-    }
-    .progress-fill{
-      height:100%;
-      background:linear-gradient(90deg,var(--accent-gold),var(--accent-light-gold));
-      border-radius:4px;
-      transition:width 0.3s ease;
-    }
-
-    .row{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-bottom:14px;
-    }
-
-    .filters{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-
-    select{
-      padding:10px 12px;
-      background-color:rgba(0,0,0,0.30);
-      border:1px solid var(--border-color);
-      border-radius:6px;
-      color:var(--text-light);
-      font-family:inherit;
-      font-size:13px;
-      transition:all 0.2s ease;
-      min-width:180px;
-    }
-    select:focus{
-      outline:none;
-      border-color:var(--accent-gold);
-      box-shadow:0 0 10px rgba(212,175,55,0.2);
-    }
-
-    .btn{
-      padding:10px 14px;
-      border:none;
-      border-radius:6px;
-      cursor:pointer;
-      font-weight:800;
-      transition:all 0.2s ease;
-      font-size:13px;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      text-decoration:none;
-      white-space:nowrap;
-    }
-    .btn-primary{
-      background-color:var(--accent-gold);
-      color:var(--primary-dark);
-    }
-    .btn-primary:hover{
-      background-color:var(--accent-light-gold);
-      transform:translateY(-2px);
-      box-shadow:0 4px 12px rgba(212,175,55,0.3);
-    }
-    .btn-secondary{
-      background-color:var(--primary-green);
-      color:var(--text-light);
-      border:1px solid var(--accent-gold);
-    }
-    .btn-secondary:hover{
-      background-color:rgba(212,175,55,0.10);
-    }
-    .btn-small{ padding:6px 12px; font-size:12px; }
-
-    /* Tables */
-    .table-container{ overflow-x:auto; margin-top:12px; }
-    table{ width:100%; border-collapse:collapse; min-width:760px; }
-    th{
-      background-color:rgba(212,175,55,0.1);
-      color:var(--accent-gold);
-      padding:12px;
-      text-align:left;
-      font-weight:900;
-      border-bottom:2px solid var(--border-color);
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:0.5px;
-      position:sticky;
-      top:0;
-      z-index:1;
-    }
-    td{
-      padding:12px;
-      border-bottom:1px solid var(--border-color);
-      color:var(--text-light);
-      font-size:13px;
-      vertical-align:middle;
-    }
-    tr:hover{ background-color:rgba(212,175,55,0.05); }
-
-    .status-badge{
-      display:inline-block;
-      padding:4px 12px;
-      border-radius:20px;
-      font-size:11px;
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:0.4px;
-      white-space:nowrap;
-    }
-    .status-active{ background-color:rgba(74,222,128,0.18); color:var(--success); }
-    .status-inactive{ background-color:rgba(239,68,68,0.18); color:var(--danger); }
-    .status-pending{ background-color:rgba(250,204,21,0.18); color:var(--warning); }
-    .status-info{ background-color:rgba(59,130,246,0.18); color:var(--info); }
-
-    .tiny{
-      font-size:12px;
-      color:var(--text-muted);
-    }
-
-    /* Alerts */
-    .alert{
-      padding:14px 16px;
-      border-radius:6px;
-      margin-bottom:14px;
-      border-left:4px solid;
-      display:flex;
-      align-items:flex-start;
-      gap:12px;
-      background:rgba(0,0,0,0.20);
-    }
-    .alert-success{ border-left-color:var(--success); color:var(--success); }
-    .alert-warning{ border-left-color:var(--warning); color:var(--warning); }
-    .alert-danger{ border-left-color:var(--danger); color:var(--danger); }
-    .alert-info{ border-left-color:var(--info); color:var(--info); }
-    .alert strong{ color:inherit; }
-    .alert p{ color:rgba(232,232,232,0.8); margin-top:4px; font-size:13px; }
-
-    /* Modal (Attendance / Details) */
-    .overlay{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,0.65);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:50;
-      padding:16px;
-    }
-    .overlay.open{ display:flex; }
-    .modal{
-      width:min(900px, 96vw);
-      max-height:88vh;
-      overflow:auto;
-      border-radius:10px;
-      border:1px solid rgba(212,175,55,0.45);
-      background:linear-gradient(135deg, rgba(26,58,42,0.98) 0%, rgba(45,90,61,0.92) 100%);
-      box-shadow:0 16px 60px rgba(0,0,0,0.6);
-      padding:16px;
-    }
-    .modal-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      border-bottom:1px solid rgba(232,197,71,0.25);
-      padding-bottom:10px;
-      margin-bottom:12px;
-    }
-    .modal-title{
-      font-weight:900;
-      color:var(--accent-gold);
-      text-transform:uppercase;
-      letter-spacing:0.6px;
-    }
-    .modal-sub{
-      font-size:12px;
-      color:rgba(232,232,232,0.75);
-      margin-top:4px;
-    }
-    .modal-body{ padding-top:6px; }
-    .attendee{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      padding:10px 12px;
-      border-radius:8px;
-      border:1px solid rgba(61,109,77,0.7);
-      background:rgba(0,0,0,0.20);
-      margin-bottom:10px;
-      align-items:center;
-    }
-    .attendee b{ color:var(--text-light); }
-    .check{
-      width:22px;height:22px;
-      border-radius:6px;
-      border:1px solid rgba(212,175,55,0.6);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      font-weight:900;
-      user-select:none;
-      color:var(--accent-gold);
-      background:rgba(0,0,0,0.12);
-    }
-    .check.done{
-      border-color:rgba(74,222,128,0.7);
-      color:var(--success);
-      background:rgba(74,222,128,0.12);
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar{ width:8px; height:8px; }
-    ::-webkit-scrollbar-track{ background:var(--bg-dark); }
-    ::-webkit-scrollbar-thumb{ background:var(--primary-green); border-radius:4px; }
-    ::-webkit-scrollbar-thumb:hover{ background:var(--accent-gold); }
-
-    /* Responsive */
-    @media (max-width: 900px){
-      .sidebar{ width:260px; }
-      table{ min-width:680px; }
-      .search{ min-width:200px; }
-    }
-    @media (max-width: 768px){
-      .container{ flex-direction:column; }
-      .sidebar{
-        width:100%;
-        height:auto;
-        border-right:none;
-        border-bottom:2px solid var(--accent-gold);
-        display:flex;
-        overflow-x:auto;
-      }
-      .nav-section{ margin-right:30px; margin-bottom:0; }
-      .header{ flex-direction:column; align-items:flex-start; }
-      .dashboard-grid{ grid-template-columns:1fr; }
-      table{ min-width:720px; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Leadership Dashboard — The Regiment (Leadership Only)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700;800&family=Exo+2:wght@300;400;600&family=Share+Tech+Mono&display=swap');
+:root{
+  --bg:#040f07;--panel:#0a2618;--gold:#C9A84C;--gold-dim:rgba(201,168,76,0.12);
+  --cream:#f0e8d0;--mid:#a8c4ac;--dim:#5a7e65;--border:rgba(201,168,76,0.18);
+  --border-hi:rgba(201,168,76,0.55);--green:#0a2618;--green-light:rgba(10,38,24,0.88);
+  --red:#ef4444;--yellow:#f59e0b;--teal:#14b8a6;--blue:#5865F2;
+  --shadow:0 18px 60px rgba(0,0,0,0.45);--radius:16px;--radius-sm:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--cream);font-family:'Exo 2',sans-serif;min-height:100vh;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(201,168,76,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.02) 1px,transparent 1px);background-size:42px 42px;pointer-events:none;}
+body::after{content:'';position:fixed;inset:-20%;background:radial-gradient(ellipse at 20% 10%,rgba(45,140,82,0.10) 0%,transparent 55%),radial-gradient(ellipse at 80% 15%,rgba(201,168,76,0.10) 0%,transparent 60%),radial-gradient(ellipse at 55% 95%,rgba(88,101,242,0.08) 0%,transparent 55%);pointer-events:none;}
+.layout{position:relative;display:grid;grid-template-columns:260px 1fr;height:100vh;}
+.sidebar{background:linear-gradient(180deg,rgba(10,38,24,0.98),rgba(4,15,7,0.98));border-right:1px solid var(--border);height:100vh;position:sticky;top:0;display:flex;flex-direction:column;overflow:hidden;}
+.main{height:100vh;overflow:auto;padding:18px 20px 22px;}
+.brand{padding:18px 16px 14px;border-bottom:1px solid var(--border);}
+.brand-eye{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);opacity:0.75;}
+.brand-name{font-family:'Rajdhani',sans-serif;font-weight:900;font-size:20px;letter-spacing:3px;text-transform:uppercase;line-height:1.05;margin-top:6px;}
+.brand-role{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--mid);margin-top:6px;text-transform:uppercase;}
+.confidential{margin-top:10px;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;border:1px solid rgba(239,68,68,0.22);background:rgba(239,68,68,0.06);color:#fca5a5;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
+.nav{flex:1;padding:10px 0;overflow:auto;}
+.nav-section{padding:12px 16px 6px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:all .15s;border-left:2px solid transparent;font-size:13px;color:var(--mid);user-select:none;}
+.nav-item:hover{background:rgba(201,168,76,0.10);color:var(--cream);}
+.nav-item.active{background:rgba(201,168,76,0.12);border-left-color:var(--gold);color:var(--gold);}
+.nav-item .icon{width:18px;text-align:center;font-size:14px;}
+.badge-count{margin-left:auto;background:rgba(239,68,68,0.95);color:white;border-radius:999px;padding:2px 8px;font-size:9px;font-family:'Share Tech Mono',monospace;letter-spacing:1px;}
+.badge-new{margin-left:auto;background:rgba(20,184,166,0.85);color:white;border-radius:999px;padding:2px 8px;font-size:9px;font-family:'Share Tech Mono',monospace;letter-spacing:1px;}
+.sidebar-footer{border-top:1px solid var(--border);padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.user-chip{display:flex;align-items:center;gap:10px;}
+.avatar{width:34px;height:34px;border-radius:12px;background:var(--gold-dim);border:1px solid var(--border-hi);display:grid;place-items:center;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:800;color:var(--gold);flex-shrink:0;}
+.user-info{flex:1;min-width:0;}
+.user-name{font-size:12px;font-weight:700;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-rank{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:2px;}
+.side-links{display:flex;gap:8px;flex-wrap:wrap;}
+.chip-link{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid rgba(201,168,76,0.18);background:rgba(10,38,24,0.55);color:var(--mid);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;transition:all .15s;}
+.chip-link:hover{border-color:var(--border-hi);color:var(--cream);transform:translateY(-1px);}
+.chip-link.primary{background:var(--gold);color:var(--bg);border-color:transparent;}
+.chip-link.primary:hover{background:#e2c06a;color:var(--bg);}
+.topbar{position:sticky;top:0;z-index:30;background:rgba(4,15,7,0.78);backdrop-filter:blur(14px);border:1px solid rgba(201,168,76,0.12);border-radius:18px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 12px 40px rgba(0,0,0,0.25);}
+.top-left{display:flex;align-items:center;gap:10px;min-width:0;}
+.hamburger{display:none;width:42px;height:42px;border-radius:14px;border:1px solid rgba(201,168,76,0.18);background:rgba(10,38,24,0.55);color:var(--gold);cursor:pointer;place-items:center;}
+.page-title{font-family:'Rajdhani',sans-serif;font-weight:900;font-size:20px;letter-spacing:3px;text-transform:uppercase;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.page-sub{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--mid);text-transform:uppercase;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.top-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+.live-clock{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gold);white-space:nowrap;padding:8px 10px;border-radius:10px;border:1px solid rgba(201,168,76,0.18);background:rgba(10,38,24,0.55);}
+.search{position:relative;min-width:200px;max-width:320px;flex:1;}
+.search input{width:100%;padding:11px 12px 11px 36px;border-radius:14px;border:1px solid rgba(201,168,76,0.18);background:rgba(10,38,24,0.55);color:var(--cream);outline:none;font-size:13px;}
+.search input:focus{border-color:var(--border-hi);box-shadow:0 0 0 3px rgba(201,168,76,0.12);}
+.search .mag{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:14px;}
+.btn{padding:10px 12px;border-radius:14px;border:1px solid rgba(201,168,76,0.22);background:rgba(201,168,76,0.10);color:var(--gold);font-family:'Rajdhani',sans-serif;font-weight:800;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:10px;}
+.btn:hover{background:rgba(201,168,76,0.18);transform:translateY(-1px);border-color:var(--border-hi);}
+.btn.primary{background:var(--gold);color:var(--bg);border-color:transparent;}
+.btn.primary:hover{background:#e2c06a;color:var(--bg);}
+.btn.discord{background:rgba(88,101,242,0.12);border-color:rgba(88,101,242,0.35);color:#c7d2fe;}
+.btn.discord:hover{background:rgba(88,101,242,0.18);border-color:rgba(88,101,242,0.55);}
+.btn.danger{background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.35);color:#fca5a5;}
+.btn.danger:hover{background:rgba(239,68,68,0.18);}
+.content{padding:14px 2px 0;}
+.page{display:none;}
+.page.active{display:block;}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:16px 2px 10px;}
+.section-head .left{display:flex;flex-direction:column;gap:6px;}
+.eyebrow{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);opacity:0.85;}
+.h2{font-family:'Rajdhani',sans-serif;font-weight:900;font-size:30px;letter-spacing:3px;text-transform:uppercase;}
+.desc{color:var(--mid);font-size:13px;line-height:1.6;max-width:820px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.card{border-radius:var(--radius);border:1px solid var(--border);background:var(--green-light);overflow:hidden;box-shadow:0 12px 44px rgba(0,0,0,0.20);}
+.card-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.card-title{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:15px;letter-spacing:2px;text-transform:uppercase;}
+.card-sub{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-top:2px;}
+.card-body{padding:14px 16px;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px;}
+.stat{border-radius:16px;border:1px solid rgba(201,168,76,0.16);background:rgba(10,38,24,0.70);padding:14px;position:relative;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:0.85;}
+.stat-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);}
+.stat-val{font-family:'Rajdhani',sans-serif;font-weight:900;font-size:30px;color:var(--gold);line-height:1;margin-top:8px;}
+.stat-sub{font-size:11px;color:var(--mid);margin-top:6px;line-height:1.3;}
+.stat-badge{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:4px 10px;border-radius:999px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;border:1px solid rgba(201,168,76,0.14);background:rgba(201,168,76,0.05);color:var(--gold);}
+.badge-green{border-color:rgba(20,184,166,0.25);background:rgba(20,184,166,0.07);color:#5eead4;}
+.badge-yellow{border-color:rgba(245,158,11,0.25);background:rgba(245,158,11,0.07);color:#fcd34d;}
+.badge-red{border-color:rgba(239,68,68,0.25);background:rgba(239,68,68,0.07);color:#fca5a5;}
+.badge-blue{border-color:rgba(88,101,242,0.25);background:rgba(88,101,242,0.07);color:#c7d2fe;}
+.badge-dim{border-color:rgba(90,126,101,0.25);background:rgba(90,126,101,0.07);color:var(--dim);}
+.table-wrap{overflow:auto;}
+table{width:100%;border-collapse:collapse;min-width:720px;}
+th{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);background:rgba(201,168,76,0.03);position:sticky;top:0;}
+td{padding:11px 12px;font-size:13px;border-bottom:1px solid rgba(201,168,76,0.07);vertical-align:middle;color:var(--mid);}
+tbody tr:hover td{background:rgba(201,168,76,0.03);color:var(--cream);}
+tbody tr.clickable{cursor:pointer;}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:999px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;border:1px solid rgba(201,168,76,0.14);background:rgba(201,168,76,0.05);color:var(--gold);white-space:nowrap;}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.dot-green{background:var(--teal);}
+.dot-yellow{background:var(--yellow);}
+.dot-red{background:var(--red);}
+.dot-blue{background:var(--blue);}
+.dot-dim{background:var(--dim);}
+.progress-wrap{background:rgba(201,168,76,0.08);border-radius:999px;height:6px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:999px;background:linear-gradient(to right,var(--gold),#e2c06a);}
+.event-list{display:flex;flex-direction:column;gap:10px;}
+.event{border-radius:14px;border:1px solid rgba(201,168,76,0.14);background:rgba(4,15,7,0.42);padding:12px 14px;display:flex;align-items:center;gap:12px;}
+.event-date{text-align:center;width:54px;flex-shrink:0;}
+.event-day{font-family:'Rajdhani',sans-serif;font-weight:900;font-size:22px;color:var(--gold);line-height:1;}
+.event-month{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-top:3px;}
+.event-info{flex:1;min-width:0;}
+.event-name{font-size:13px;font-weight:700;color:var(--cream);}
+.event-meta{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--mid);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.event-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+.event-actions .btn{padding:8px 10px;border-radius:12px;font-size:11px;}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.select{padding:10px 12px;border-radius:14px;border:1px solid rgba(201,168,76,0.18);background:rgba(10,38,24,0.55);color:var(--cream);outline:none;font-size:12px;font-family:'Exo 2',sans-serif;}
+.select:focus{border-color:var(--border-hi);box-shadow:0 0 0 3px rgba(201,168,76,0.12);}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;z-index:80;}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:min(520px,92vw);background:rgba(10,38,24,0.98);border-left:1px solid rgba(201,168,76,0.22);box-shadow:var(--shadow);transform:translateX(110%);transition:transform .18s ease;z-index:90;display:flex;flex-direction:column;}
+.drawer-overlay.open{display:block;}
+.drawer.open{transform:translateX(0);}
+.drawer-head{padding:14px;border-bottom:1px solid rgba(201,168,76,0.18);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.drawer-title{font-family:'Rajdhani',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:16px;}
+.drawer-sub{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--mid);text-transform:uppercase;margin-top:4px;}
+.drawer-body{padding:14px;overflow:auto;display:flex;flex-direction:column;gap:12px;}
+.drawer-foot{padding:12px 14px;border-top:1px solid rgba(201,168,76,0.18);display:flex;gap:8px;justify-content:flex-end;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{width:min(680px,96vw);max-height:88vh;overflow:auto;border-radius:var(--radius);border:1px solid rgba(201,168,76,0.35);background:rgba(10,38,24,0.98);box-shadow:var(--shadow);display:flex;flex-direction:column;}
+.modal-head{padding:16px;border-bottom:1px solid rgba(201,168,76,0.18);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.modal-title{font-family:'Rajdhani',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:18px;}
+.modal-sub{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--mid);text-transform:uppercase;margin-top:4px;}
+.modal-body{padding:16px;display:flex;flex-direction:column;gap:12px;}
+.modal-foot{padding:12px 16px;border-top:1px solid rgba(201,168,76,0.18);display:flex;gap:8px;justify-content:flex-end;}
+.check{width:22px;height:22px;border-radius:8px;border:1px solid rgba(201,168,76,0.24);background:transparent;color:var(--gold);display:grid;place-items:center;cursor:pointer;transition:all .14s;user-select:none;}
+.check:hover{border-color:var(--border-hi);transform:translateY(-1px);}
+.check.done{background:rgba(20,184,166,0.14);border-color:rgba(20,184,166,0.45);color:#5eead4;}
+.form-card{border-radius:14px;border:1px solid rgba(201,168,76,0.14);background:rgba(4,15,7,0.55);padding:16px;display:flex;flex-direction:column;gap:10px;transition:all .15s;}
+.form-card:hover{border-color:rgba(201,168,76,0.30);background:rgba(4,15,7,0.70);}
+.form-card-icon{font-size:22px;line-height:1;}
+.form-card-name{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--cream);}
+.form-card-desc{font-size:12px;color:var(--mid);line-height:1.5;}
+.form-card-who{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);}
+.form-card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.form-card-actions .btn{padding:8px 10px;border-radius:10px;font-size:10px;}
+.sop-item{border-radius:14px;border:1px solid rgba(201,168,76,0.14);background:rgba(4,15,7,0.42);padding:14px 16px;display:flex;gap:14px;align-items:flex-start;}
+.sop-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex-shrink:0;}
+.sop-icon.green{background:rgba(20,184,166,0.12);border:1px solid rgba(20,184,166,0.25);}
+.sop-icon.yellow{background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.22);}
+.sop-icon.red{background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.22);}
+.sop-icon.gold{background:rgba(201,168,76,0.10);border:1px solid rgba(201,168,76,0.22);}
+.sop-content{flex:1;min-width:0;}
+.sop-title{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--cream);}
+.sop-detail{font-size:12px;color:var(--mid);line-height:1.6;margin-top:4px;}
+.sop-tag{margin-top:8px;}
+.info-row{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.08);}
+.info-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);width:110px;flex-shrink:0;}
+.info-value{font-size:12px;color:var(--mid);}
+@media(max-width:980px){
+  body{overflow:auto;}
+  .layout{grid-template-columns:1fr;}
+  .sidebar{position:fixed;top:0;left:0;width:260px;transform:translateX(-110%);transition:transform .18s ease;z-index:70;box-shadow:var(--shadow);}
+  .sidebar.open{transform:translateX(0);}
+  .hamburger{display:inline-grid;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .grid2,.grid3,.grid4{grid-template-columns:1fr;}
+  .live-clock{display:none;}
+}
+::-webkit-scrollbar{width:7px;height:7px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.20);border-radius:999px;}
+</style>
 </head>
-
 <body>
-  <div class="container">
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="logo">
-        <div class="logo-icon">⚔️</div>
-        <div class="logo-text-wrap">
-          <div class="logo-text">The Regiment</div>
-          <div class="logo-sub">Leadership Dashboard</div>
-        </div>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-eye">// Leadership Portal</div>
+    <div class="brand-name">The Regiment</div>
+    <div class="brand-role">Command Dashboard</div>
+    <div class="confidential">&#x1F512; Leadership Only &middot; Not for public</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Command</div>
+    <div class="nav-item active" data-page="overview"><span class="icon">&#9889;</span> Overview</div>
+    <div class="nav-item" data-page="actions"><span class="icon">&#9989;</span> Action Queue <span class="badge-count" id="actionCount">0</span></div>
+    <div class="nav-section">Squads</div>
+    <div class="nav-item" data-page="roster"><span class="icon">&#128101;</span> Roster Manager</div>
+    <div class="nav-item" data-page="health"><span class="icon">&#128200;</span> Squad Health</div>
+    <div class="nav-section">Training &amp; Ops</div>
+    <div class="nav-item" data-page="training"><span class="icon">&#127919;</span> Training Tracker</div>
+    <div class="nav-item" data-page="events"><span class="icon">&#128506;</span> Missions &amp; Events</div>
+    <div class="nav-section">Smartsheet</div>
+    <div class="nav-item" data-page="forms"><span class="icon">&#128203;</span> Forms Hub <span class="badge-new">New</span></div>
+    <div class="nav-section">Structure</div>
+    <div class="nav-item" data-page="org"><span class="icon">&#127963;</span> Org Chart</div>
+    <div class="nav-item" data-page="sop"><span class="icon">&#128209;</span> Standards &amp; SOP</div>
+    <div class="nav-item" data-page="resources"><span class="icon">&#128194;</span> Leader Resources</div>
+    <div class="nav-section">Alerts</div>
+    <div class="nav-item" data-page="alerts"><span class="icon">&#128276;</span> Alerts <span class="badge-count" id="alertCount">3</span></div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="avatar" id="userAvatar">C</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Commander</div>
+        <div class="user-rank" id="userRole">// Regiment CO</div>
       </div>
+    </div>
+    <div class="side-links">
+      <a class="chip-link primary" data-link="REGIMENTHQ" href="#" target="_blank" rel="noopener">RegimentHQ &#8599;</a>
+      <a class="chip-link" data-link="DISCORD" href="#" target="_blank" rel="noopener">Discord &#8599;</a>
+      <a class="chip-link" data-link="SS_MASTER" href="#" target="_blank" rel="noopener">Smartsheet &#8599;</a>
+    </div>
+  </div>
+</aside>
 
-      <div class="confidential">
-        <span>🔒</span>
-        <div>
-          <strong>Leadership Only</strong>
-          <div class="tiny">Internal use. Do not share publicly.</div>
-        </div>
+<main class="main">
+  <div class="topbar">
+    <div class="top-left">
+      <button class="hamburger" id="hamburger" aria-label="Menu">&#9776;</button>
+      <div>
+        <div class="page-title" id="topTitle">Leadership Dashboard</div>
+        <div class="page-sub" id="topSub">// Command snapshot &middot; review ready</div>
       </div>
-
-      <div class="nav-section">
-        <div class="nav-section-title">Main</div>
-        <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard', this)">
-          <div class="nav-icon">📊</div><span>Dashboard</span>
-        </div>
-        <div class="nav-item" data-page="roster" onclick="showPage('roster', this)">
-          <div class="nav-icon">👥</div><span>Squad Roster</span>
-        </div>
-        <div class="nav-item" data-page="training" onclick="showPage('training', this)">
-          <div class="nav-icon">🎯</div><span>Training Tracker</span>
-        </div>
+    </div>
+    <div class="top-right">
+      <div class="live-clock" id="liveClock">--:--:--</div>
+      <div class="search">
+        <span class="mag">&#8981;</span>
+        <input id="globalSearch" type="search" placeholder="Search members, sessions, actions..."/>
       </div>
+      <button class="btn" id="exportBtn">&#128229; Export CSV</button>
+      <button class="btn primary" id="newTrainingBtn">+ New Training</button>
+      <a class="btn discord" data-link="DISCORD" href="#" target="_blank" rel="noopener">Discord &#8599;</a>
+    </div>
+  </div>
 
-      <div class="nav-section">
-        <div class="nav-section-title">Operations</div>
-        <div class="nav-item" data-page="missions" onclick="showPage('missions', this)">
-          <div class="nav-icon">🎖️</div><span>Missions</span>
-        </div>
-        <div class="nav-item" data-page="squadhealth" onclick="showPage('squadhealth', this)">
-          <div class="nav-icon">📈</div><span>Squad Health</span>
-        </div>
-        <div class="nav-item" data-page="resources" onclick="showPage('resources', this)">
-          <div class="nav-icon">📦</div><span>Resources</span>
-        </div>
+  <div class="content">
+<!-- PAGE: OVERVIEW -->
+<section class="page active" id="page-overview">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Command Overview</div>
+      <div class="h2">Command Overview</div>
+      <div class="desc">Single pane for leadership: squad health, training cadence, roster risk, and action queue. All data flows from Smartsheet.</div>
+    </div>
+    <div class="filters">
+      <select class="select" id="overviewTimeWindow">
+        <option value="14">Window: last 14 days</option>
+        <option value="30">Window: last 30 days</option>
+        <option value="60">Window: last 60 days</option>
+      </select>
+      <button class="btn" data-link-btn="SS_MASTER">&#128202; Master Sheet &#8599;</button>
+    </div>
+  </div>
+  <div class="stats" id="kpiStats"></div>
+  <div class="grid2" style="margin-top:14px;">
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">Upcoming Sessions</div><div class="card-sub">// Next 7 days</div></div>
+        <button class="btn" data-nav="training">View All</button>
       </div>
-
-      <div class="nav-section">
-        <div class="nav-section-title">System</div>
-        <div class="nav-item" data-page="alerts" onclick="showPage('alerts', this)">
-          <div class="nav-icon">🔔</div><span>Alerts</span>
-          <span class="nav-badge" id="alertCount">0</span>
-        </div>
+      <div class="card-body"><div class="event-list" id="upcomingSessions"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">Combat Basics Coverage</div><div class="card-sub">// By squad</div></div>
+        <button class="btn" data-nav="health">Squad Health</button>
       </div>
+      <div class="card-body" id="combatCoverage"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <div class="card-header">
+      <div><div class="card-title">Action Queue</div><div class="card-sub">// Highest leverage tasks</div></div>
+      <button class="btn" data-nav="actions">Full Queue</button>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table><thead><tr><th>Action</th><th>Priority</th><th>Owner</th><th>Due</th><th>Done</th></tr></thead>
+        <tbody id="actionPreview"></tbody></table>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <div class="sidebar-footer">
-        <div class="sidebar-links">
-          <a class="chip-link" id="linkRegimentHQ" href="https://regimenthq.com" target="_blank" rel="noopener">RegimentHQ ↗</a>
-          <a class="chip-link" id="linkDiscord" href="#" target="_blank" rel="noopener">Discord ↗</a>
-          <a class="chip-link" id="linkSmartsheet" href="#" target="_blank" rel="noopener">Smartsheet ↗</a>
+<!-- PAGE: ACTIONS -->
+<section class="page" id="page-actions">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Execution</div>
+      <div class="h2">Action Queue</div>
+      <div class="desc">Leadership keeps the unit moving. Close loops fast. Log attendance within 24h. Actions persist locally.</div>
+    </div>
+    <div class="filters">
+      <select class="select" id="actionFilterPriority">
+        <option value="all">Priority: All</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="normal">Normal</option>
+      </select>
+      <select class="select" id="actionFilterStatus">
+        <option value="open">Status: Open</option>
+        <option value="done">Status: Done</option>
+        <option value="all">Status: All</option>
+      </select>
+      <button class="btn primary" id="addActionBtn">+ Add Action</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Queue</div><div class="card-sub">// Click Done to close items</div></div>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table><thead><tr><th>Action</th><th>Priority</th><th>Owner</th><th>Due</th><th>Done</th></tr></thead>
+        <tbody id="actionTable"></tbody></table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE: ROSTER -->
+<section class="page" id="page-roster">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Squad Management</div>
+      <div class="h2">Roster Manager</div>
+      <div class="desc">Full member directory with role, platform, certifications, and risk status. Click a member name for full profile. Data from Smartsheet roster sheet.</div>
+    </div>
+    <div class="filters">
+      <select class="select" id="rosterFilterSquad"></select>
+      <select class="select" id="rosterFilterStatus">
+        <option value="all">Status: All</option>
+        <option value="active">Active</option>
+        <option value="atrisk">At-Risk</option>
+        <option value="pending">Pending</option>
+        <option value="churned">Churned</option>
+      </select>
+      <select class="select" id="rosterFilterRole">
+        <option value="all">Role: All</option>
+        <option value="rifleman">Rifleman</option>
+        <option value="medic">Medic</option>
+        <option value="engineer">Engineer</option>
+        <option value="sniper">Sniper</option>
+        <option value="demo">Demo</option>
+      </select>
+      <button class="btn" data-link-btn="FORM_MEMBER_REG">+ Member Reg Form &#8599;</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Member Directory</div><div class="card-sub">// Click name for full profile &middot; check to mark reviewed</div></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" data-link-btn="SS_ROSTER">View Sheet &#8599;</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Member</th><th>Discord</th><th>Squad</th><th>Role</th><th>Platform</th><th>Status</th><th>Combat Basics</th><th>Last Active</th><th>Risk</th><th>Reviewed</th></tr></thead>
+          <tbody id="rosterTable"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;text-align:center;">// Replace with live Smartsheet feed via API or Zapier automation</div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE: HEALTH -->
+<section class="page" id="page-health">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Visibility</div>
+      <div class="h2">Squad Health</div>
+      <div class="desc">Health score = activity rate + combat basics completion + retention. Use this in leadership meetings to drive accountability.</div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">Health Scoreboard</div><div class="card-sub">// Red / Yellow / Green</div></div>
+      </div>
+      <div class="card-body" id="healthScoreboard"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">Health Definitions</div><div class="card-sub">// Keep standards enforceable</div></div>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="pill"><span class="dot dot-green"></span>Green (70+): 70%+ active, 70%+ Combat Basics, logs current</div>
+        <div class="pill"><span class="dot dot-yellow"></span>Yellow (50-69): Activity dip OR Combat Basics below target</div>
+        <div class="pill"><span class="dot dot-red"></span>Red (below 50): Churn risk growing OR missing attendance logs</div>
+        <div style="color:var(--mid);font-size:13px;line-height:1.6;margin-top:6px;padding:10px 12px;border-radius:12px;border:1px solid rgba(201,168,76,0.12);background:rgba(201,168,76,0.04);">
+          <strong style="color:var(--gold);font-family:'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;">Meeting Script:</strong><br/>
+          "What is the issue? What is the fix? Who owns it? By when?"<br/>
+          Run through each red/yellow squad every leadership sync.
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+          <button class="btn" data-nav="sop">View Standards &#8599;</button>
+          <button class="btn" data-link-btn="SS_ATTENDANCE">Attendance Sheet &#8599;</button>
         </div>
       </div>
     </div>
+  </div>
+</section>
 
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Header -->
-      <div class="header">
-        <div class="header-left">
-          <div class="header-title" id="pageTitle">Leadership Dashboard</div>
-          <div class="header-sub" id="pageSubtitle">Command view · roster · trainings · ops</div>
-        </div>
+<!-- PAGE: TRAINING -->
+<section class="page" id="page-training">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Training Operations</div>
+      <div class="h2">Training Tracker</div>
+      <div class="desc">View sessions, open a session to mark attendance. Post registration link 3+ days before each session. Log attendance within 24h.</div>
+    </div>
+    <div class="filters">
+      <select class="select" id="trainingFilterType">
+        <option value="all">Type: All</option>
+        <option value="cert">Certification</option>
+        <option value="role">Role</option>
+        <option value="advanced">Advanced</option>
+        <option value="gm">GM</option>
+      </select>
+      <button class="btn" data-link-btn="FORM_TRAINING_REG">&#128203; Registration Form &#8599;</button>
+      <button class="btn primary" id="scheduleTrainingBtn">+ Schedule Training</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Training Sessions</div><div class="card-sub">// Open session to mark attendance</div></div>
+      <button class="btn" data-link-btn="SS_TRAINING">View Sheet &#8599;</button>
+    </div>
+    <div class="card-body">
+      <div class="event-list" id="trainingSessions"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <div class="card-header">
+      <div><div class="card-title">Certification Coverage</div><div class="card-sub">// Unit-wide certification status</div></div>
+    </div>
+    <div class="card-body" id="certCoverage"></div>
+  </div>
+</section>
 
-        <div class="header-info">
-          <div class="pill">Last Updated: <span id="lastUpdate">—</span></div>
-
-          <div class="search">
-            <span class="mag">⌕</span>
-            <input id="globalSearch" type="search" placeholder="Search current page..." />
-          </div>
-
-          <div class="user-profile">
-            <div class="user-avatar" id="userAvatar">WW</div>
-            <div>
-              <div class="user-name" id="userName">WSSIWarlordI</div>
-              <div class="user-role">Commander</div>
-            </div>
-          </div>
-        </div>
+<!-- PAGE: EVENTS -->
+<section class="page" id="page-events">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Operations</div>
+      <div class="h2">Missions &amp; Events</div>
+      <div class="desc">Planning and visibility layer. Keep exact times in Discord. Sign-ups via Smartsheet mission form.</div>
+    </div>
+    <div class="filters">
+      <button class="btn" data-link-btn="FORM_MISSION">Mission Signup Form &#8599;</button>
+      <button class="btn primary">+ New Mission</button>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">GM Mission Pipeline</div><div class="card-sub">// Schedule + ownership</div></div>
+        <button class="btn" data-link-btn="SS_MISSIONS">Sheet &#8599;</button>
       </div>
+      <div class="card-body"><div class="event-list" id="gmPipeline"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">Competitive / External</div><div class="card-sub">// ARCL + scrims</div></div>
+      </div>
+      <div class="card-body"><div class="event-list" id="compEvents"></div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <div class="card-header">
+      <div><div class="card-title">After-Action Reports</div><div class="card-sub">// Post-mission logging</div></div>
+      <button class="btn" data-link-btn="FORM_AAR">&#128203; AAR Form &#8599;</button>
+    </div>
+    <div class="card-body">
+      <div class="desc" style="margin-bottom:10px;">After every mission or significant event, the responsible leader must submit an After-Action Report. This feeds the Smartsheet mission history and leadership review process.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn primary" data-link-btn="FORM_AAR">Submit AAR &#8599;</button>
+        <button class="btn" data-link-btn="SS_MISSIONS">View AAR History &#8599;</button>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <!-- Content -->
-      <div class="content">
-        <!-- DASHBOARD -->
-        <div id="dashboard" class="page active">
-          <div class="dashboard-grid" id="kpiGrid"></div>
+<!-- PAGE: FORMS HUB (NEW) -->
+<section class="page" id="page-forms">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Smartsheet Integration</div>
+      <div class="h2">Forms Hub</div>
+      <div class="desc">All Smartsheet forms in one place. Leaders share the relevant form link when needed. Members submit directly to Smartsheet — no manual data entry required.</div>
+    </div>
+    <div class="filters">
+      <button class="btn" data-link-btn="SS_MASTER">&#128202; Master Sheet &#8599;</button>
+    </div>
+  </div>
 
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Recent Activity</div>
-              <div class="filters">
-                <button class="btn btn-secondary btn-small" onclick="showPage('training', document.querySelector('[data-page=training]'))">Open Training</button>
-                <button class="btn btn-primary btn-small" onclick="showPage('alerts', document.querySelector('[data-page=alerts]'))">View Alerts</button>
-              </div>
-            </div>
+  <div style="margin-bottom:12px;padding:12px 14px;border-radius:14px;border:1px solid rgba(20,184,166,0.25);background:rgba(20,184,166,0.06);">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#5eead4;margin-bottom:6px;">// How This Works</div>
+    <div style="font-size:13px;color:var(--mid);line-height:1.6;">Replace each <code style="background:rgba(201,168,76,0.12);padding:1px 6px;border-radius:4px;color:var(--gold);">YOUR_..._FORM</code> placeholder in the LINKS section of this file with your actual Smartsheet form URLs. Leaders share the relevant link, members submit the form, and data appears automatically in the corresponding Smartsheet.</div>
+  </div>
 
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Event</th>
-                    <th>Owner</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="recentActivity"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- ROSTER -->
-        <div id="roster" class="page">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Squad Roster</div>
-              <div class="filters">
-                <select id="filterSquad"></select>
-                <select id="filterStatus">
-                  <option value="all">Status: All</option>
-                  <option value="active">Active</option>
-                  <option value="atrisk">At-Risk</option>
-                  <option value="pending">Pending</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <select id="filterCombat">
-                  <option value="all">Combat Basics: All</option>
-                  <option value="complete">Complete</option>
-                  <option value="pending">Pending</option>
-                  <option value="notstarted">Not Started</option>
-                </select>
-                <button class="btn btn-primary btn-small" id="exportRoster">Export CSV</button>
-              </div>
-            </div>
-
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Discord</th>
-                    <th>Squad</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Combat Basics</th>
-                    <th>Last Active</th>
-                  </tr>
-                </thead>
-                <tbody id="rosterTable"></tbody>
-              </table>
-            </div>
-            <div class="tiny" style="margin-top:10px;">
-              Tip: This is review-ready with sample data. Later, you can replace the arrays in the script with Smartsheet-fed data.
-            </div>
-          </div>
-        </div>
-
-        <!-- TRAINING -->
-        <div id="training" class="page">
-          <div class="dashboard-grid" id="trainingSummary"></div>
-
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Training Schedule</div>
-              <div class="filters">
-                <select id="filterTrainingType">
-                  <option value="all">Type: All</option>
-                  <option value="basic">Basic</option>
-                  <option value="advanced">Advanced</option>
-                  <option value="leadership">Leadership</option>
-                </select>
-                <button class="btn btn-primary btn-small" id="btnScheduleTraining">+ Schedule Training</button>
-              </div>
-            </div>
-
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Training Module</th>
-                    <th>Instructor</th>
-                    <th>Date</th>
-                    <th>Duration</th>
-                    <th>Registered</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="trainingTable"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- MISSIONS -->
-        <div id="missions" class="page">
-          <div class="dashboard-grid" id="missionSummary"></div>
-
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Mission Log</div>
-              <div class="filters">
-                <button class="btn btn-primary btn-small" id="btnNewMission">+ New Mission</button>
-              </div>
-            </div>
-
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Mission ID</th>
-                    <th>Objective</th>
-                    <th>Squad</th>
-                    <th>Start Date</th>
-                    <th>Status</th>
-                    <th>Completion</th>
-                  </tr>
-                </thead>
-                <tbody id="missionTable"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- SQUAD HEALTH -->
-        <div id="squadhealth" class="page">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Squad Health — Status View</div>
-              <div class="filters">
-                <select id="filterHealthPlatoon">
-                  <option value="all">Platoon: All</option>
-                  <option value="Platoon 1">Platoon 1</option>
-                  <option value="Platoon 2">Platoon 2</option>
-                </select>
-                <button class="btn btn-secondary btn-small" onclick="showPage('roster', document.querySelector('[data-page=roster]'))">View Roster</button>
-              </div>
-            </div>
-
-            <div class="dashboard-grid" id="healthGrid"></div>
-            <div class="tiny" style="margin-top:10px;">
-              Health is driven by: activity (last 14 days) + Combat Basics coverage + overdue training logs.
-            </div>
-          </div>
-        </div>
-
-        <!-- RESOURCES -->
-        <div id="resources" class="page">
-          <div class="dashboard-grid" id="resourceSummary"></div>
-
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Leadership Links</div>
-              <div class="filters">
-                <a class="btn btn-secondary btn-small" id="linkTrainingSheet" href="#" target="_blank" rel="noopener">Training Sheet ↗</a>
-                <a class="btn btn-primary btn-small" id="linkAttendanceSheet" href="#" target="_blank" rel="noopener">Attendance Tracker ↗</a>
-              </div>
-            </div>
-
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Resource</th>
-                    <th>Purpose</th>
-                    <th>Owner</th>
-                    <th>Link</th>
-                  </tr>
-                </thead>
-                <tbody id="resourceTable"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- ALERTS -->
-        <div id="alerts" class="page">
-          <div id="alertsList"></div>
-
-          <div class="card" style="margin-top:16px;">
-            <div class="card-header">
-              <div class="card-title">Alert History</div>
-            </div>
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Alert Type</th>
-                    <th>Message</th>
-                    <th>Severity</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="alertHistory"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
+  <div class="eyebrow" style="padding:8px 2px 6px;">Member Management</div>
+  <div class="grid3" style="margin-bottom:14px;">
+    <div class="form-card">
+      <div class="form-card-icon">&#128100;</div>
+      <div class="form-card-name">Member Registration</div>
+      <div class="form-card-desc">New recruits register their details: Discord, in-game name, platform, timezone, preferred role, and availability. Feeds the roster sheet automatically.</div>
+      <div class="form-card-who">// Filled by: New Recruits</div>
+      <div class="form-card-actions">
+        <button class="btn primary" data-link-btn="FORM_MEMBER_REG">Open Form &#8599;</button>
+        <button class="btn" data-link-btn="SS_ROSTER">View Responses &#8599;</button>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-icon">&#128724;</div>
+      <div class="form-card-name">Leave of Absence</div>
+      <div class="form-card-desc">Members who need to go inactive temporarily submit this form. Captures reason, expected return date, and contact info. Prevents false churn flags.</div>
+      <div class="form-card-who">// Filled by: All Members</div>
+      <div class="form-card-actions">
+        <button class="btn primary" data-link-btn="FORM_LOA">Open Form &#8599;</button>
+        <button class="btn" data-link-btn="SS_MASTER">View Responses &#8599;</button>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-icon">&#128172;</div>
+      <div class="form-card-name">Member Feedback</div>
+      <div class="form-card-desc">Anonymous feedback channel for members to raise concerns, suggestions, or ideas. Leadership reviews weekly. Keeps communication channels open.</div>
+      <div class="form-card-who">// Filled by: All Members (anonymous)</div>
+      <div class="form-card-actions">
+        <button class="btn primary" data-link-btn="FORM_FEEDBACK">Open Form &#8599;</button>
+        <button class="btn" data-link-btn="SS_MASTER">View Responses &#8599;</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal -->
-  <div class="overlay" id="overlay">
-    <div class="modal">
-      <div class="modal-head">
-        <div>
-          <div class="modal-title" id="modalTitle">Session</div>
-          <div class="modal-sub" id="modalSub">Details</div>
-        </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="btn btn-secondary btn-small" id="modalReset">Reset</button>
-          <button class="btn btn-primary btn-small" id="modalSave">Save</button>
-          <button class="btn btn-secondary btn-small" id="modalClose">Close</button>
-        </div>
+  <div class="eyebrow" style="padding:8px 2px 6px;">Training &amp; Certifications</div>
+  <div class="grid3" style="margin-bottom:14px;">
+    <div class="form-card">
+      <div class="form-card-icon">&#128203;</div>
+      <div class="form-card-name">Training Registration</div>
+      <div class="form-card-desc">Members register for upcoming training sessions. Leaders share this link at least 3 days before each session. Captures name, Discord, squad, and session name.</div>
+      <div class="form-card-who">// Filled by: Members signing up for training</div>
+      <div class="form-card-actions">
+        <button class="btn primary" data-link-btn="FORM_TRAINING_REG">Open Form &#8599;</button>
+        <button class="btn" data-link-btn="SS_TRAINING">View Responses &#8599;</button>
       </div>
-      <div class="modal-body" id="modalBody"></div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-icon">&#9989;</div>
+      <div class="form-card-name">Attendance Log</div>
+      <div class="form-card-desc">Leaders submit attendance within 24h of every training session. Captures session name, date, instructor, and list of attendees who passed/failed. Drives Combat Basics status.</div>
+      <div class="form-card-who">// Filled by: Instructors / Squad Leaders</div>
+      <div class="form-card-actions">
+        <button class="btn primary" data-link-btn="FORM_ATTENDANCE">Open Form &#8599;</button>
+        <button class="btn" data-link-btn="SS_ATTENDANCE">View Responses &#8599;</button>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-icon">&#127942;</div>
+      <div class="form-card-name">Cert Application</div>
+      <div class="form-card-desc">Members who believe they have met certification requirements apply here. Requires sponsor name, evidence link, and cert type. Leadership reviews and approves via Smartsheet.</div>
+      <div class="form-card-who">// Filled by: Members applying for certification</div>
+      <div class="form-card-actions">
+        <button class="btn primary" data-link-btn="FORM_TRAINING_REG">Open Form &#8599;</button>
+        <button class="btn" data-link-btn="SS_TRAINING">View Responses &#8599;</button>
+      </div>
     </div>
   </div>
 
-  <script>
-    /***************************************************************
-     * 1) UPDATE YOUR LINKS HERE
-     ***************************************************************/
-    const LINKS = {
-      regimentHQ: "https://regimenthq.com",
-      discord: "YOUR_DISCORD_LINK_HERE",
-      smartsheet: "YOUR_SMARTSHEET_MASTER_LINK_HERE",
-      trainingSheet: "YOUR_TRAINING_SHEET_LINK_HERE",
-      attendanceSheet: "YOUR_ATTENDANCE_SHEET_LINK_HERE",
-    };
+  <div class="eyebrow" style="padding:8px 2px 6px;">Operations &amp; Administration</div>
+  <div class="grid3">
+    <div class="form-card">
+      <div class="form-card-icon">&#127899;</div>
+      <div class="form-card-name">Mission Signup</div>
+      <div class="form-card-desc">Members register interest and role preference for specific missions. Leaders use responses to build the mission roster. Feeds the mission pipeline sheet.</div>
+      <div class="form-card-who">// Filled by: All Members</div>
+      <div class="form-card-actions">
+        <button class="btn primary" data-link-btn="FORM_MISSION">Open Form &#8599;</button>
+        <button class="btn" data-link-btn="SS_MISSIONS">View Responses &#8599;</button>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-icon">&#128196;</div>
+      <div class="form-card-name">After-Action Report</div>
+      <div class="form-card-desc">Post-mission / post-training report submitted by the responsible leader. Captures what went well, issues, action items, and attendance summary. Required within 48h of event.</div>
+      <div class="form-card-who">// Filled by: Mission Lead / Instructor</div>
+      <div class="form-card-actions">
+        <button class="btn primary" data-link-btn="FORM_AAR">Open Form &#8599;</button>
+        <button class="btn" data-link-btn="SS_MISSIONS">View AARs &#8599;</button>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-icon">&#128680;</div>
+      <div class="form-card-name">Incident Report</div>
+      <div class="form-card-desc">For reporting rule violations, behavioral issues, or unit conduct concerns. Confidential. Reviewed only by Command. Captures involved parties, incident details, and recommended action.</div>
+      <div class="form-card-who">// Filled by: Leaders / Command</div>
+      <div class="form-card-actions">
+        <button class="btn danger" data-link-btn="FORM_INCIDENT">Open Form &#8599;</button>
+        <button class="btn" data-link-btn="SS_MASTER">View Reports &#8599;</button>
+      </div>
+    </div>
+  </div>
+</section>
 
-    document.getElementById("linkRegimentHQ").href = LINKS.regimentHQ;
-    document.getElementById("linkDiscord").href = LINKS.discord;
-    document.getElementById("linkSmartsheet").href = LINKS.smartsheet;
-    document.getElementById("linkTrainingSheet").href = LINKS.trainingSheet;
-    document.getElementById("linkAttendanceSheet").href = LINKS.attendanceSheet;
+<!-- PAGE: ORG -->
+<section class="page" id="page-org">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Structure</div>
+      <div class="h2">Org Chart</div>
+      <div class="desc">Click a platoon to expand its squads. Click a squad's Roster button to jump to filtered roster view.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Hierarchy</div><div class="card-sub">// Commander &rarr; Platoons &rarr; Squads</div></div>
+    </div>
+    <div class="card-body" id="orgChart"></div>
+  </div>
+</section>
 
-    /***************************************************************
-     * 2) SAMPLE DATA (replace later with Smartsheet/Zapier feed)
-     ***************************************************************/
-    const squads = [
-      { id:"alpha", name:"Alpha", platoon:"Platoon 1", leader:"[SL Alpha]" },
-      { id:"bravo", name:"Bravo", platoon:"Platoon 1", leader:"[SL Bravo]" },
-      { id:"charlie", name:"Charlie", platoon:"Platoon 2", leader:"[SL Charlie]" },
-      { id:"delta", name:"Delta", platoon:"Platoon 2", leader:"[SL Delta]" },
-    ];
-
-    const members = [
-      { name:"Commander Alpha", discord:"@cmdalpha", squad:"command", role:"Commander", status:"active", combat:"complete", lastActiveDays:1 },
-      { name:"Lieutenant Beta", discord:"@ltbeta", squad:"alpha", role:"Platoon Lead", status:"active", combat:"complete", lastActiveDays:3 },
-      { name:"Sergeant Gamma", discord:"@sgtgamma", squad:"bravo", role:"Training Lead", status:"active", combat:"complete", lastActiveDays:2 },
-      { name:"Corporal Delta", discord:"@cpldelta", squad:"alpha", role:"Specialist", status:"active", combat:"pending", lastActiveDays:8 },
-      { name:"Private Echo", discord:"@pvtEcho", squad:"charlie", role:"Rifleman", status:"pending", combat:"notstarted", lastActiveDays: null },
-      { name:"Private Foxtrot", discord:"@pvtFox", squad:"bravo", role:"Support", status:"active", combat:"pending", lastActiveDays:12 },
-      { name:"Member X", discord:"@memberx", squad:"delta", role:"Rifleman", status:"atrisk", combat:"pending", lastActiveDays:22 },
-      { name:"Member Y", discord:"@membery", squad:"delta", role:"Rifleman", status:"inactive", combat:"notstarted", lastActiveDays:45 },
-    ];
-
-    const trainings = [
-      {
-        id:"TRN-001", module:"Combat Basics", type:"basic",
-        instructor:"Sergeant Gamma", date:"2026-03-05", duration:"2 hours",
-        registered:["Private Foxtrot","Corporal Delta","Member X","Member Y"],
-        status:"Scheduled"
-      },
-      {
-        id:"TRN-002", module:"Leadership Fundamentals", type:"leadership",
-        instructor:"Lieutenant Beta", date:"2026-03-08", duration:"3 hours",
-        registered:["Sergeant Gamma","Corporal Delta"],
-        status:"Scheduled"
-      },
-      {
-        id:"TRN-003", module:"Tactical Awareness", type:"advanced",
-        instructor:"Sergeant Gamma", date:"2026-03-10", duration:"2 hours",
-        registered:["Private Foxtrot","Member X"],
-        status:"Scheduled"
-      },
-    ];
-
-    const missions = [
-      { id:"MIS-2026-001", objective:"Reconnaissance Patrol", squad:"alpha", start:"2026-02-28", status:"Active", completion:45 },
-      { id:"MIS-2026-002", objective:"Supply Delivery", squad:"bravo", start:"2026-02-27", status:"Active", completion:72 },
-      { id:"MIS-2026-003", objective:"Training Exercise", squad:"charlie", start:"2026-03-01", status:"Active", completion:15 },
-      { id:"MIS-2026-004", objective:"Perimeter Security", squad:"delta", start:"2026-02-25", status:"Completed", completion:100 },
-    ];
-
-    const resources = [
-      { name:"Master Command Sheet", purpose:"SSOT roster + training + status", owner:"Command", link: LINKS.smartsheet },
-      { name:"Training Registration Sheet", purpose:"Upcoming sessions + signups", owner:"Training Lead", link: LINKS.trainingSheet },
-      { name:"Attendance Tracker", purpose:"Mark attendance + completion", owner:"Instructors", link: LINKS.attendanceSheet },
-      { name:"RegimentHQ", purpose:"Public info + recruiting funnel", owner:"Command", link: LINKS.regimentHQ },
-    ];
-
-    const alerts = [
-      { type:"warning", title:"Training Completion Reminder", msg:"4 members have not completed Combat Basics. Follow up with: Member X, Member Y, Private Echo, and 1 other.", when:"2026-03-01 20:40" },
-      { type:"info", title:"New Member Onboarding", msg:"3 new members joined this week. Ensure they complete onboarding and get routed to squads/reserves.", when:"2026-03-01 19:10" },
-      { type:"danger", title:"Inactive Members Detected", msg:"1+ members inactive 30+ days. Squad leaders: attempt contact and update status.", when:"2026-03-01 18:00" },
-    ];
-
-    const alertHistory = [
-      { date:"2026-03-01 20:30", type:"System", message:"Backup completed successfully", severity:"Info", status:"Resolved" },
-      { date:"2026-02-28 15:45", type:"Training", message:"Training module updated", severity:"Info", status:"Resolved" },
-      { date:"2026-02-27 10:20", type:"Roster", message:"Roster cleanup performed", severity:"Warning", status:"Resolved" },
-    ];
-
-    const recentActivity = [
-      { date:"2026-03-01", event:"Training Session Completed", owner:"Squad Alpha", status:"Completed" },
-      { date:"2026-02-28", event:"Mission Deployment", owner:"Squad Bravo", status:"Active" },
-      { date:"2026-02-27", event:"Equipment Maintenance", owner:"Logistics", status:"In Progress" },
-      { date:"2026-02-26", event:"Personnel Evaluation", owner:"Command Staff", status:"Completed" },
-    ];
-
-    /***************************************************************
-     * 3) LOCAL STATE (attendance tracking for review)
-     ***************************************************************/
-    const STORE = {
-      attendanceKey: "rg_lead_attendance_v1"
-    };
-
-    function getAttendanceState(){
-      try { return JSON.parse(localStorage.getItem(STORE.attendanceKey) || "{}"); }
-      catch(e){ return {}; }
-    }
-    function saveAttendanceState(st){
-      localStorage.setItem(STORE.attendanceKey, JSON.stringify(st));
-    }
-
-    /***************************************************************
-     * 4) NAV + TITLE
-     ***************************************************************/
-    const titles = {
-      dashboard: ["Leadership Dashboard","Command view · roster · trainings · ops"],
-      roster: ["Squad Roster","Filter by squad/status/combat basics"],
-      training: ["Training Tracker","Sessions · attendance · completion tracking"],
-      missions: ["Missions","Mission log · status · completion"],
-      squadhealth: ["Squad Health","Platoon/squad view for readiness + risk"],
-      resources: ["Resources","Leadership links + templates + tools"],
-      alerts: ["Alerts & Notifications","System + roster + training alerts"]
-    };
-
-    function showPage(pageId, navEl){
-      // pages
-      document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-      const page = document.getElementById(pageId);
-      if(page) page.classList.add("active");
-
-      // nav active
-      document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
-      if(navEl) navEl.classList.add("active");
-
-      // title
-      const t = titles[pageId] || ["Leadership Dashboard",""];
-      document.getElementById("pageTitle").textContent = t[0];
-      document.getElementById("pageSubtitle").textContent = t[1];
-
-      // render
-      renderPage(pageId);
-
-      // search reset effect (keeps input, but re-applies filter)
-      applySearchFilter();
-    }
-
-    /***************************************************************
-     * 5) RENDER HELPERS
-     ***************************************************************/
-    function badgeForStatus(s){
-      const val = String(s || "").toLowerCase();
-      if(val === "active" || val === "completed") return "status-badge status-active";
-      if(val === "pending" || val === "scheduled" || val === "in progress") return "status-badge status-pending";
-      if(val === "inactive") return "status-badge status-inactive";
-      return "status-badge status-info";
-    }
-
-    function squadLabel(id){
-      const s = squads.find(x=>x.id===id);
-      if(id === "command") return "Command";
-      return s ? s.name : "—";
-    }
-
-    function percent(n, d){
-      if(!d) return 0;
-      return Math.max(0, Math.min(100, Math.round((n/d)*100)));
-    }
-
-    /***************************************************************
-     * 6) RENDER: DASHBOARD
-     ***************************************************************/
-    function renderDashboard(){
-      const total = members.length;
-      const active = members.filter(m=>m.status==="active").length;
-      const pending = members.filter(m=>m.status==="pending").length;
-      const atRisk = members.filter(m=>m.status==="atrisk" || (m.lastActiveDays!==null && m.lastActiveDays>=15 && m.lastActiveDays<=30)).length;
-      const inactive = members.filter(m=>m.status==="inactive" || (m.lastActiveDays!==null && m.lastActiveDays>30)).length;
-
-      const combatComplete = members.filter(m=>m.combat==="complete").length;
-      const combatPct = percent(combatComplete, total);
-
-      const kpis = [
-        { title:"Active Members", badge:`+${Math.max(0, active - 1)}`, value:String(active), label:"Total Active Personnel", pct:percent(active,total) },
-        { title:"Pending Onboard", badge:String(pending), value:String(pending), label:"Awaiting squad routing", pct:percent(pending,total) },
-        { title:"Training Readiness", badge:`${combatPct}%`, value:`${combatPct}%`, label:"Combat Basics Coverage", pct:combatPct },
-        { title:"At-Risk / Inactive", badge:String(atRisk + inactive), value:String(atRisk + inactive), label:"Needs follow-up", pct:percent(atRisk+inactive,total) },
-      ];
-
-      document.getElementById("kpiGrid").innerHTML = kpis.map(k=>`
-        <div class="card" data-searchable="true">
-          <div class="card-header">
-            <div class="card-title">${k.title}</div>
-            <div class="card-badge">${k.badge}</div>
+<!-- PAGE: STANDARDS & SOP -->
+<section class="page" id="page-sop">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Operational Standards</div>
+      <div class="h2">Standards &amp; SOP</div>
+      <div class="desc">The non-negotiables that keep the unit professional. Leadership is expected to know and enforce these. Share with new leaders during onboarding.</div>
+    </div>
+  </div>
+  <div class="grid2" style="margin-bottom:14px;">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Activity Standards</div><div class="card-sub">// How we define member status</div></div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="sop-item">
+          <div class="sop-icon green">&#9989;</div>
+          <div class="sop-content">
+            <div class="sop-title">Active</div>
+            <div class="sop-detail">Seen in game or in Discord within the last <strong style="color:var(--gold);">14 days</strong>. Eligible for all ops slots and squad roles. Green status.</div>
           </div>
-          <div class="stat-value">${k.value}</div>
-          <div class="stat-label">${k.label}</div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${k.pct}%;"></div></div>
         </div>
-      `).join("");
-
-      document.getElementById("recentActivity").innerHTML = recentActivity.map(r=>`
-        <tr data-searchable="true">
-          <td>${r.date}</td>
-          <td>${r.event}</td>
-          <td>${r.owner}</td>
-          <td><span class="${badgeForStatus(r.status)}">${r.status}</span></td>
-        </tr>
-      `).join("");
-    }
-
-    /***************************************************************
-     * 7) RENDER: ROSTER
-     ***************************************************************/
-    function renderRoster(){
-      // build squad filter options once
-      const squadSel = document.getElementById("filterSquad");
-      if(!squadSel.dataset.ready){
-        const opts = [`<option value="all">Squad: All</option>`,
-          `<option value="command">Command</option>`,
-          ...squads.map(s=>`<option value="${s.id}">${s.name} (${s.platoon})</option>`)
-        ];
-        squadSel.innerHTML = opts.join("");
-        squadSel.dataset.ready = "1";
-      }
-
-      const fs = document.getElementById("filterSquad").value;
-      const fstatus = document.getElementById("filterStatus").value;
-      const fcombat = document.getElementById("filterCombat").value;
-
-      const filtered = members.filter(m=>{
-        const okSquad = (fs==="all") ? true : (m.squad===fs);
-        const okStatus = (fstatus==="all") ? true : (m.status===fstatus);
-        const okCombat = (fcombat==="all") ? true : (m.combat===fcombat);
-        return okSquad && okStatus && okCombat;
-      });
-
-      document.getElementById("rosterTable").innerHTML = filtered.map(m=>{
-        const last = (m.lastActiveDays===null) ? "New" : `${m.lastActiveDays}d ago`;
-        return `
-          <tr data-searchable="true">
-            <td><b>${m.name}</b></td>
-            <td>${m.discord}</td>
-            <td>${squadLabel(m.squad)}</td>
-            <td>${m.role || "—"}</td>
-            <td><span class="${badgeForStatus(m.status)}">${m.status}</span></td>
-            <td><span class="${badgeForStatus(m.combat==='complete'?'completed':'pending')}">${m.combat}</span></td>
-            <td>${last}</td>
-          </tr>
-        `;
-      }).join("");
-
-      // Export CSV
-      document.getElementById("exportRoster").onclick = ()=>{
-        const rows = [["Name","Discord","Squad","Role","Status","CombatBasics","LastActiveDays"]];
-        filtered.forEach(m=>{
-          rows.push([m.name,m.discord,squadLabel(m.squad),m.role||"",m.status,m.combat, (m.lastActiveDays===null ? "New" : m.lastActiveDays)]);
-        });
-        const csv = rows.map(r=>r.map(x=>String(x).replaceAll('"','""')).map(x=>`"${x}"`).join(",")).join("\n");
-        const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "regiment_roster_export.csv";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      };
-    }
-
-    /***************************************************************
-     * 8) RENDER: TRAINING + ATTENDANCE MODAL
-     ***************************************************************/
-    const overlay = document.getElementById("overlay");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalSub = document.getElementById("modalSub");
-    const modalBody = document.getElementById("modalBody");
-    const modalClose = document.getElementById("modalClose");
-    const modalSave = document.getElementById("modalSave");
-    const modalReset = document.getElementById("modalReset");
-
-    let activeTrainingId = null;
-
-    function openModal(){
-      overlay.classList.add("open");
-    }
-    function closeModal(){
-      overlay.classList.remove("open");
-      activeTrainingId = null;
-    }
-    modalClose.onclick = closeModal;
-    overlay.addEventListener("click", (e)=>{ if(e.target === overlay) closeModal(); });
-
-    function renderTraining(){
-      // summary cards
-      const total = members.length;
-      const basicDone = members.filter(m=>m.combat==="complete").length;
-      const basicPct = percent(basicDone, total);
-
-      const advancedTotal = members.filter(m=>m.status==="active").length;
-      const advancedDone = Math.max(0, Math.round(advancedTotal * 0.68)); // placeholder
-      const advancedPct = percent(advancedDone, advancedTotal || 1);
-
-      const specDone = Math.max(0, Math.round(advancedTotal * 0.45)); // placeholder
-      const specPct = percent(specDone, advancedTotal || 1);
-
-      const cards = [
-        { title:"Basic Training (Combat Basics)", badge:`${basicPct}%`, label:`${basicDone} of ${total} completed`, pct:basicPct },
-        { title:"Advanced Training", badge:`${advancedPct}%`, label:`${advancedDone} of ${advancedTotal} completed`, pct:advancedPct },
-        { title:"Specialization", badge:`${specPct}%`, label:`${specDone} of ${advancedTotal} completed`, pct:specPct },
-      ];
-
-      document.getElementById("trainingSummary").innerHTML = cards.map(c=>`
-        <div class="card" data-searchable="true">
-          <div class="card-header">
-            <div class="card-title">${c.title}</div>
-            <div class="card-badge">${c.badge}</div>
+        <div class="sop-item">
+          <div class="sop-icon yellow">&#9888;</div>
+          <div class="sop-content">
+            <div class="sop-title">At-Risk</div>
+            <div class="sop-detail">No activity for <strong style="color:var(--gold);">15–30 days</strong>. Squad Leader must make direct contact within 72h. If no response, escalate to Platoon Leader.</div>
           </div>
-          <div class="stat-label">Completion Rate</div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${c.pct}%;"></div></div>
-          <p class="tiny" style="margin-top:10px;">${c.label}</p>
         </div>
-      `).join("");
-
-      // schedule table
-      const type = document.getElementById("filterTrainingType").value || "all";
-      const filtered = trainings.filter(t => type==="all" ? true : t.type===type);
-
-      const attendance = getAttendanceState();
-
-      document.getElementById("trainingTable").innerHTML = filtered.map(t=>{
-        const key = `training:${t.id}`;
-        const marked = attendance[key] ? Object.values(attendance[key]).filter(Boolean).length : 0;
-        const reg = (t.registered || []).length;
-        const statusClass = badgeForStatus(String(t.status).toLowerCase());
-
-        return `
-          <tr data-searchable="true">
-            <td><b>${t.module}</b><div class="tiny">${t.id}</div></td>
-            <td>${t.instructor}</td>
-            <td>${t.date}</td>
-            <td>${t.duration}</td>
-            <td>${reg} <span class="tiny">(marked ${marked})</span></td>
-            <td><span class="${statusClass}">${t.status}</span></td>
-            <td>
-              <button class="btn btn-secondary btn-small" onclick="openAttendance('${t.id}')">Attendance</button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-
-      document.getElementById("btnScheduleTraining").onclick = ()=>{
-        alert("V1: Scheduling UI is a placeholder. In V2 we can add a modal + Smartsheet form integration.");
-      };
-    }
-
-    function openAttendance(trainingId){
-      const t = trainings.find(x=>x.id===trainingId);
-      if(!t) return;
-      activeTrainingId = trainingId;
-
-      modalTitle.textContent = `Attendance — ${t.module}`;
-      modalSub.textContent = `${t.id} · ${t.date} · Instructor: ${t.instructor}`;
-
-      const state = getAttendanceState();
-      const key = `training:${t.id}`;
-      const saved = state[key] || {};
-
-      modalBody.innerHTML = `
-        <div class="tiny" style="margin-bottom:10px;">
-          Mark who attended. This saves locally for review. Later we can push to Smartsheet/Zapier.
+        <div class="sop-item">
+          <div class="sop-icon red">&#10060;</div>
+          <div class="sop-content">
+            <div class="sop-title">Churned / Inactive</div>
+            <div class="sop-detail">No activity for <strong style="color:var(--gold);">31+ days</strong> with no LOA on file. Removed from active squad. Retained in roster for 30 additional days before archive.</div>
+          </div>
         </div>
-        ${(t.registered||[]).map(name=>{
-          const checked = !!saved[name];
-          return `
-            <div class="attendee" data-searchable="true">
+        <div class="sop-item">
+          <div class="sop-icon gold">&#128203;</div>
+          <div class="sop-content">
+            <div class="sop-title">Leave of Absence</div>
+            <div class="sop-detail">Member submitted LOA form with return date. Status paused. No churn flag. Squad Leader checks in on return date. If no-show, moves to At-Risk.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Training Standards</div><div class="card-sub">// Non-negotiable execution</div></div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="sop-item">
+          <div class="sop-icon green">&#128203;</div>
+          <div class="sop-content">
+            <div class="sop-title">Registration Link Posted 3+ Days Prior</div>
+            <div class="sop-detail">The Training Registration Form link must be shared in the appropriate Discord channel <strong style="color:var(--gold);">at least 3 days</strong> before each session. Pinned + announced.</div>
+          </div>
+        </div>
+        <div class="sop-item">
+          <div class="sop-icon green">&#9989;</div>
+          <div class="sop-content">
+            <div class="sop-title">Attendance Logged Within 24 Hours</div>
+            <div class="sop-detail">The Attendance Log form must be submitted by the instructor <strong style="color:var(--gold);">within 24h</strong> of every session. Missing logs are escalated to Command at 48h.</div>
+          </div>
+        </div>
+        <div class="sop-item">
+          <div class="sop-icon yellow">&#127919;</div>
+          <div class="sop-content">
+            <div class="sop-title">Combat Basics Before Ops Slots</div>
+            <div class="sop-detail">No member may be placed in an operational slot until <strong style="color:var(--gold);">Combat Basics is marked Complete</strong> in Smartsheet. Instructors are accountable for the mark.</div>
+          </div>
+        </div>
+        <div class="sop-item">
+          <div class="sop-icon gold">&#128200;</div>
+          <div class="sop-content">
+            <div class="sop-title">Cert Completion Update</div>
+            <div class="sop-detail">After any certification session, the instructor updates the member's cert status in the Training Sheet <strong style="color:var(--gold);">within 48h</strong>. Completion visible on roster immediately.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Leadership Cadence</div><div class="card-sub">// Recurring responsibilities</div></div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="sop-item">
+          <div class="sop-icon green">&#128197;</div>
+          <div class="sop-content">
+            <div class="sop-title">Weekly: Squad Leader Check-In</div>
+            <div class="sop-detail">Every Squad Leader contacts all At-Risk members weekly. Outcome logged in Smartsheet (contacted / no response / resolved). Escalate no-response to Platoon Leader.</div>
+          </div>
+        </div>
+        <div class="sop-item">
+          <div class="sop-icon yellow">&#128197;</div>
+          <div class="sop-content">
+            <div class="sop-title">Bi-Weekly: Leadership Sync</div>
+            <div class="sop-detail">All leadership meets bi-weekly. Agenda: health scores, open actions, training schedule, mission pipeline, escalations. Each leader submits Leadership Notes form before the meeting.</div>
+          </div>
+        </div>
+        <div class="sop-item">
+          <div class="sop-icon gold">&#128197;</div>
+          <div class="sop-content">
+            <div class="sop-title">Monthly: Roster Audit</div>
+            <div class="sop-detail">Platoon Leaders audit their full roster for accuracy. Churned members archived. Pending members followed up. Certification statuses verified against Smartsheet training records.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Escalation Procedures</div><div class="card-sub">// When to escalate and how</div></div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="sop-item">
+          <div class="sop-icon red">&#128680;</div>
+          <div class="sop-content">
+            <div class="sop-title">Missing Attendance Log (48h)</div>
+            <div class="sop-detail">If attendance is not logged 48h after a session: Squad Leader escalates to Platoon Leader. Platoon Leader contacts instructor directly. Logs outstanding item in Action Queue.</div>
+          </div>
+        </div>
+        <div class="sop-item">
+          <div class="sop-icon red">&#128101;</div>
+          <div class="sop-content">
+            <div class="sop-title">Member No-Show (72h no response)</div>
+            <div class="sop-detail">At-Risk member does not respond within 72h of Squad Leader contact: Platoon Leader attempts outreach. After 7 days total silence with no LOA: Status moved to Churned.</div>
+          </div>
+        </div>
+        <div class="sop-item">
+          <div class="sop-icon red">&#128681;</div>
+          <div class="sop-content">
+            <div class="sop-title">Conduct Issue</div>
+            <div class="sop-detail">Any rule violation or conduct concern: Incident Report form submitted immediately. Do not wait. Command reviews within 24h. Matter is confidential until resolved.</div>
+          </div>
+        </div>
+        <div style="margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn danger" data-link-btn="FORM_INCIDENT">Submit Incident Report &#8599;</button>
+          <button class="btn" data-link-btn="FORM_LEADERSHIP_NOTES">Leadership Notes Form &#8599;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE: RESOURCES -->
+<section class="page" id="page-resources">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Leadership Toolbox</div>
+      <div class="h2">Leader Resources</div>
+      <div class="desc">Quick access to all sheets, forms, external links, and leadership standards. Bookmark this page.</div>
+    </div>
+  </div>
+  <div class="grid2" style="margin-bottom:14px;">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Smartsheet Links</div><div class="card-sub">// Replace with your real URLs</div></div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+        <a class="btn" data-link="SS_MASTER" href="#" target="_blank" rel="noopener">&#128202; Master Command Sheet &#8599;</a>
+        <a class="btn" data-link="SS_TRAINING" href="#" target="_blank" rel="noopener">&#127919; Training Tracker Sheet &#8599;</a>
+        <a class="btn" data-link="SS_ATTENDANCE" href="#" target="_blank" rel="noopener">&#9989; Attendance Log Sheet &#8599;</a>
+        <a class="btn" data-link="SS_ROSTER" href="#" target="_blank" rel="noopener">&#128101; Roster Sheet &#8599;</a>
+        <a class="btn" data-link="SS_MISSIONS" href="#" target="_blank" rel="noopener">&#127899; Mission Pipeline Sheet &#8599;</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Quick Form Links</div><div class="card-sub">// Share these with members</div></div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+        <a class="btn primary" data-link="FORM_MEMBER_REG" href="#" target="_blank" rel="noopener">&#128100; Member Registration Form &#8599;</a>
+        <a class="btn" data-link="FORM_TRAINING_REG" href="#" target="_blank" rel="noopener">&#128203; Training Registration Form &#8599;</a>
+        <a class="btn" data-link="FORM_ATTENDANCE" href="#" target="_blank" rel="noopener">&#9989; Attendance Log Form &#8599;</a>
+        <a class="btn" data-link="FORM_MISSION" href="#" target="_blank" rel="noopener">&#127899; Mission Signup Form &#8599;</a>
+        <a class="btn" data-link="FORM_LOA" href="#" target="_blank" rel="noopener">&#128724; Leave of Absence Form &#8599;</a>
+        <a class="btn" data-link="FORM_AAR" href="#" target="_blank" rel="noopener">&#128196; After-Action Report Form &#8599;</a>
+        <a class="btn danger" data-link="FORM_INCIDENT" href="#" target="_blank" rel="noopener">&#128680; Incident Report Form &#8599;</a>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Leader Responsibilities</div><div class="card-sub">// Operational standards checklist</div></div></div>
+    <div class="card-body">
+      <div class="grid2">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="pill" style="flex-wrap:wrap;height:auto;padding:8px 10px;"><span class="dot dot-green"></span>Post training registration link 3+ days prior</div>
+          <div class="pill" style="flex-wrap:wrap;height:auto;padding:8px 10px;"><span class="dot dot-green"></span>Mark attendance within 24 hours of session</div>
+          <div class="pill" style="flex-wrap:wrap;height:auto;padding:8px 10px;"><span class="dot dot-green"></span>Update cert status in Smartsheet within 48h</div>
+          <div class="pill" style="flex-wrap:wrap;height:auto;padding:8px 10px;"><span class="dot dot-yellow"></span>Contact at-risk members every week</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="pill" style="flex-wrap:wrap;height:auto;padding:8px 10px;"><span class="dot dot-yellow"></span>Submit leadership notes before bi-weekly sync</div>
+          <div class="pill" style="flex-wrap:wrap;height:auto;padding:8px 10px;"><span class="dot dot-yellow"></span>Enforce Combat Basics before ops slot assignment</div>
+          <div class="pill" style="flex-wrap:wrap;height:auto;padding:8px 10px;"><span class="dot dot-red"></span>Escalate missing logs / failures within 48h</div>
+          <div class="pill" style="flex-wrap:wrap;height:auto;padding:8px 10px;"><span class="dot dot-red"></span>File incident report immediately on conduct issues</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE: ALERTS -->
+<section class="page" id="page-alerts">
+  <div class="section-head">
+    <div class="left">
+      <div class="eyebrow">// Notifications</div>
+      <div class="h2">Alerts</div>
+      <div class="desc">Nothing slips through the cracks. Each alert has an owner and a required action. Dismiss when resolved.</div>
+    </div>
+    <div class="filters">
+      <select class="select" id="alertFilter">
+        <option value="all">Level: All</option>
+        <option value="red">Critical</option>
+        <option value="yellow">Warning</option>
+        <option value="green">Info</option>
+      </select>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Active Alerts</div><div class="card-sub">// Dismiss when resolved</div></div>
+    </div>
+    <div class="card-body" id="alertList"></div>
+  </div>
+</section>
+
+  </div><!-- end .content -->
+</main>
+</div><!-- end .layout -->
+<!-- Attendance Drawer -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div>
+      <div class="drawer-title" id="drawerTitle">Session</div>
+      <div class="drawer-sub" id="drawerSub">Details</div>
+    </div>
+    <button class="btn" id="drawerClose">Close</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot">
+    <button class="btn" data-link-btn-drawer="FORM_AAR" id="drawerAARBtn">AAR Form &#8599;</button>
+    <button class="btn" id="drawerReset">Reset</button>
+    <button class="btn primary" id="drawerSave">Save Attendance</button>
+  </div>
+</aside>
+
+<!-- Member Detail Modal -->
+<div class="modal-overlay" id="memberModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="memberModalName">Member Name</div>
+        <div class="modal-sub" id="memberModalSub">// Profile</div>
+      </div>
+      <button class="btn" id="memberModalClose">Close</button>
+    </div>
+    <div class="modal-body" id="memberModalBody"></div>
+    <div class="modal-foot">
+      <button class="btn danger" id="memberModalFlag">Flag At-Risk</button>
+      <button class="btn primary" id="memberModalDone">Mark Reviewed</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Action Modal -->
+<div class="modal-overlay" id="actionModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Add Action</div>
+        <div class="modal-sub">// Add to the action queue</div>
+      </div>
+      <button class="btn" id="actionModalClose">Cancel</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Action Description</div>
+          <input id="newActionText" type="text" placeholder="e.g. Mark attendance — Bravo training (Mar 5)" style="width:100%;padding:11px 12px;border-radius:12px;border:1px solid rgba(201,168,76,0.22);background:rgba(10,38,24,0.55);color:var(--cream);font-size:13px;outline:none;font-family:'Exo 2',sans-serif;"/>
+        </div>
+        <div class="grid3" style="gap:10px;">
+          <div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Priority</div>
+            <select id="newActionPriority" class="select" style="width:100%;">
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="normal" selected>Normal</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Owner</div>
+            <input id="newActionOwner" type="text" placeholder="Squad Leader / Command" style="width:100%;padding:11px 12px;border-radius:12px;border:1px solid rgba(201,168,76,0.22);background:rgba(10,38,24,0.55);color:var(--cream);font-size:13px;outline:none;font-family:'Exo 2',sans-serif;"/>
+          </div>
+          <div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:6px;">Due Date</div>
+            <input id="newActionDue" type="text" placeholder="e.g. Mar 10" style="width:100%;padding:11px 12px;border-radius:12px;border:1px solid rgba(201,168,76,0.22);background:rgba(10,38,24,0.55);color:var(--cream);font-size:13px;outline:none;font-family:'Exo 2',sans-serif;"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="actionModalCancel">Cancel</button>
+      <button class="btn primary" id="actionModalSave">Add to Queue</button>
+    </div>
+  </div>
+</div>
+<script>
+/* =========================================================
+   LINKS — Replace with your actual Smartsheet & Discord URLs
+========================================================= */
+const LINKS = {
+  REGIMENTHQ:          "https://regimenthq.com",
+  DISCORD:             "YOUR_DISCORD_INVITE_OR_CHANNEL_LINK",
+  // Smartsheet Sheets
+  SS_MASTER:           "YOUR_SMARTSHEET_MASTER_SHEET_URL",
+  SS_TRAINING:         "YOUR_SMARTSHEET_TRAINING_SHEET_URL",
+  SS_ATTENDANCE:       "YOUR_SMARTSHEET_ATTENDANCE_SHEET_URL",
+  SS_ROSTER:           "YOUR_SMARTSHEET_ROSTER_SHEET_URL",
+  SS_MISSIONS:         "YOUR_SMARTSHEET_MISSIONS_SHEET_URL",
+  // Smartsheet Forms
+  FORM_MEMBER_REG:     "YOUR_MEMBER_REGISTRATION_FORM_URL",
+  FORM_TRAINING_REG:   "YOUR_TRAINING_REGISTRATION_FORM_URL",
+  FORM_ATTENDANCE:     "YOUR_ATTENDANCE_LOG_FORM_URL",
+  FORM_AAR:            "YOUR_AFTER_ACTION_REPORT_FORM_URL",
+  FORM_INCIDENT:       "YOUR_INCIDENT_REPORT_FORM_URL",
+  FORM_MISSION:        "YOUR_MISSION_SIGNUP_FORM_URL",
+  FORM_FEEDBACK:       "YOUR_MEMBER_FEEDBACK_FORM_URL",
+  FORM_LOA:            "YOUR_LEAVE_OF_ABSENCE_FORM_URL",
+  FORM_LEADERSHIP_NOTES: "YOUR_LEADERSHIP_MEETING_NOTES_FORM_URL",
+};
+
+function applyLinks(){
+  document.querySelectorAll("[data-link]").forEach(a=>{
+    const k=a.getAttribute("data-link");
+    if(LINKS[k]) a.href=LINKS[k];
+  });
+  document.querySelectorAll("[data-link-btn]").forEach(btn=>{
+    const k=btn.getAttribute("data-link-btn");
+    btn.addEventListener("click",()=>window.open(LINKS[k]||"#","_blank","noopener"));
+  });
+}
+
+/* =========================================================
+   DATA — Replace later with Smartsheet API / Zapier feeds
+========================================================= */
+const squads=[
+  {id:"alpha",name:"Alpha",platoon:"Platoon 1",leader:"[SL Alpha]",members:12},
+  {id:"bravo",name:"Bravo",platoon:"Platoon 1",leader:"[SL Bravo]",members:10},
+  {id:"charlie",name:"Charlie",platoon:"Platoon 2",leader:"[SL Charlie]",members:10},
+  {id:"delta",name:"Delta",platoon:"Platoon 2",leader:"[SL Delta]",members:9}
+];
+
+const members=[
+  {name:"Member001",discord:"@handle1",squad:"alpha",role:"rifleman",platform:"PC",timezone:"EST",joinDate:"2025-10-15",status:"active",certs:{combatBasics:"complete",medical:"complete",engineering:"none"},lastActiveDays:1,risk:"low",notes:""},
+  {name:"Member002",discord:"@handle2",squad:"alpha",role:"medic",platform:"PS5",timezone:"EST",joinDate:"2025-11-02",status:"atrisk",certs:{combatBasics:"pending",medical:"none",engineering:"none"},lastActiveDays:18,risk:"medium",notes:"No response to last contact."},
+  {name:"Member003",discord:"@handle3",squad:"bravo",role:"rifleman",platform:"PC",timezone:"CST",joinDate:"2025-09-20",status:"active",certs:{combatBasics:"complete",medical:"none",engineering:"none"},lastActiveDays:3,risk:"low",notes:""},
+  {name:"Member004",discord:"@handle4",squad:"charlie",role:"engineer",platform:"PC",timezone:"GMT",joinDate:"2025-08-10",status:"churned",certs:{combatBasics:"none",medical:"none",engineering:"none"},lastActiveDays:45,risk:"high",notes:"No LOA filed. Marked churned."},
+  {name:"Member005",discord:"@handle5",squad:"delta",role:"rifleman",platform:"Xbox",timezone:"PST",joinDate:"2026-02-20",status:"pending",certs:{combatBasics:"notstarted",medical:"none",engineering:"none"},lastActiveDays:null,risk:"new",notes:"New recruit. Awaiting squad placement."},
+  {name:"Member006",discord:"@handle6",squad:"delta",role:"sniper",platform:"PC",timezone:"EST",joinDate:"2025-12-01",status:"active",certs:{combatBasics:"pending",medical:"none",engineering:"none"},lastActiveDays:9,risk:"low",notes:""},
+  {name:"Member007",discord:"@handle7",squad:"bravo",role:"rifleman",platform:"PS5",timezone:"MST",joinDate:"2025-10-30",status:"active",certs:{combatBasics:"complete",medical:"none",engineering:"none"},lastActiveDays:6,risk:"low",notes:""},
+  {name:"Member008",discord:"@handle8",squad:"charlie",role:"demo",platform:"PC",timezone:"EST",joinDate:"2025-11-15",status:"atrisk",certs:{combatBasics:"pending",medical:"none",engineering:"none"},lastActiveDays:22,risk:"medium",notes:"Squad Leader contacted Mar 1."}
+];
+
+const trainings=[
+  {id:"t1",name:"Combat Basics — Alpha Squad",type:"cert",certType:"combatBasics",date:"2026-03-03",leader:"[Squad Leader]",registered:["Member001","Member002","Member009","Member010","Member011","Member012","Member013","Member014"]},
+  {id:"t2",name:"Tactical Breach — Bravo",type:"advanced",certType:null,date:"2026-03-05",leader:"[Instructor]",registered:["Member003","Member007","Member015","Member016","Member017"]},
+  {id:"t3",name:"GM Mission Brief: Operation Ironwall",type:"gm",certType:null,date:"2026-03-07",leader:"[GM]",registered:["All Squads"]}
+];
+
+const missionPipeline=[
+  {day:"07",month:"Mar",name:"Operation Ironwall",meta:"GM: [Leader] · All squads · ~2hr",status:"ready"},
+  {day:"14",month:"Mar",name:"Operation Deadfall",meta:"GM: [Leader] · Alpha + Bravo",status:"dev"},
+  {day:"TBD",month:"Mar",name:"[GM Slot Open]",meta:"No GM assigned yet",status:"needed"}
+];
+
+const competitiveEvents=[
+  {day:"15",month:"Mar",name:"ARCL Match — Round 3",meta:"vs. [Opponent] · Competitive roster required",status:"confirmed"},
+  {day:"22",month:"Mar",name:"Friendly Scrim",meta:"Discord TBD · Sign-ups open",status:"open"}
+];
+
+let actions=[
+  {id:"a1",text:"Mark attendance — Combat Basics (Charlie, Feb 22)",priority:"critical",owner:"[Instructor]",due:"Overdue",done:false},
+  {id:"a2",text:"Contact 8 at-risk members",priority:"high",owner:"Squad Leaders",due:"Mar 5",done:false},
+  {id:"a3",text:"Assign 5 pending members to squads",priority:"high",owner:"Platoon Leaders",due:"Mar 3",done:false},
+  {id:"a4",text:"Post Combat Basics registration link — all squads",priority:"normal",owner:"All Leaders",due:"Mar 7",done:false},
+  {id:"a5",text:"Fill GM slot for 3rd March mission",priority:"normal",owner:"GM Pool",due:"Mar 10",done:false}
+];
+
+let alerts=[
+  {id:"al1",level:"red",title:"Attendance Log Missing — Combat Basics (Charlie, Feb 22)",detail:"Day 8. Instructor has not marked attendance. Escalated to Command. Action required within 24h.",owner:"[Instructor]",dismissed:false},
+  {id:"al2",level:"yellow",title:"8 Members At-Risk of Churn",detail:"No activity in 15–30 days. Squad leaders must make direct contact this week. Log outcome in Smartsheet.",owner:"Squad Leaders",dismissed:false},
+  {id:"al3",level:"yellow",title:"5 Members Pending Squad Assignment",detail:"Registered via form. Not yet placed in a squad. Platoon leaders: review roster and assign by Mar 3.",owner:"Platoon Leaders",dismissed:false}
+];
+
+/* =========================================================
+   Local persistence
+========================================================= */
+const STORE={
+  actionsKey:"rg_lead_actions_v2",
+  attendanceKey:"rg_lead_attendance_v2",
+  rosterReviewedKey:"rg_lead_roster_reviewed_v2",
+  alertsKey:"rg_lead_alerts_v2"
+};
+
+function loadState(){
+  try{const a=localStorage.getItem(STORE.actionsKey);if(a)actions=JSON.parse(a);}catch(e){}
+  try{const a=localStorage.getItem(STORE.alertsKey);if(a){const d=JSON.parse(a);alerts=alerts.map(al=>{const saved=d.find(x=>x.id===al.id);return saved?{...al,dismissed:saved.dismissed}:al;});}}catch(e){}
+}
+function saveActions(){localStorage.setItem(STORE.actionsKey,JSON.stringify(actions));}
+function saveAlerts(){localStorage.setItem(STORE.alertsKey,JSON.stringify(alerts.map(a=>({id:a.id,dismissed:a.dismissed}))));}
+function attendanceState(){try{return JSON.parse(localStorage.getItem(STORE.attendanceKey)||"{}");}catch(e){return {};}}
+function saveAttendance(s){localStorage.setItem(STORE.attendanceKey,JSON.stringify(s));}
+function rosterReviewedState(){try{return JSON.parse(localStorage.getItem(STORE.rosterReviewedKey)||"{}");}catch(e){return {};}}
+function saveRosterReviewed(s){localStorage.setItem(STORE.rosterReviewedKey,JSON.stringify(s));}
+loadState();
+
+/* =========================================================
+   Helpers
+========================================================= */
+function squadName(id){const s=squads.find(x=>x.id===id);return s?s.name:"—";}
+function fmtDate(iso){const d=new Date(iso+"T00:00:00");return d.toLocaleDateString(undefined,{month:"short",day:"2-digit",year:"numeric"});}
+function dayMonth(iso){const d=new Date(iso+"T00:00:00");return{day:String(d.getDate()).padStart(2,"0"),month:d.toLocaleDateString(undefined,{month:"short"})};}
+
+function pillForPriority(p){
+  if(p==="critical")return`<span class="pill badge-red">Critical</span>`;
+  if(p==="high")return`<span class="pill badge-yellow">High</span>`;
+  return`<span class="pill badge-dim">Normal</span>`;
+}
+function statusPill(s){
+  if(s==="active")return`<span class="pill"><span class="dot dot-green"></span>Active</span>`;
+  if(s==="atrisk")return`<span class="pill badge-yellow"><span class="dot dot-yellow"></span>At-Risk</span>`;
+  if(s==="pending")return`<span class="pill badge-dim"><span class="dot dot-dim"></span>Pending</span>`;
+  if(s==="churned")return`<span class="pill badge-red"><span class="dot dot-red"></span>Churned</span>`;
+  return`<span class="pill badge-dim">Unknown</span>`;
+}
+function certPill(c){
+  if(c==="complete")return`<span class="pill badge-green">&#10003; Complete</span>`;
+  if(c==="pending")return`<span class="pill badge-yellow">Pending</span>`;
+  if(c==="notstarted")return`<span class="pill badge-dim">Not Started</span>`;
+  return`<span class="pill badge-dim">&#8212;</span>`;
+}
+function riskPill(r){
+  if(r==="high")return`<span class="pill badge-red">High</span>`;
+  if(r==="medium")return`<span class="pill badge-yellow">Medium</span>`;
+  if(r==="new")return`<span class="pill badge-dim">New</span>`;
+  return`<span class="pill badge-green">Low</span>`;
+}
+function rolePill(r){
+  const map={rifleman:"&#128481;",medic:"&#10133;",engineer:"&#128296;",sniper:"&#127919;",demo:"&#128163;"};
+  return`<span style="font-size:12px;color:var(--mid);">${map[r]||"&#128481;"} ${r.charAt(0).toUpperCase()+r.slice(1)}</span>`;
+}
+
+/* =========================================================
+   Live Clock
+========================================================= */
+function updateClock(){
+  const d=new Date();
+  document.getElementById("liveClock").textContent=
+    d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit",second:"2-digit"})+" UTC"+(d.getTimezoneOffset()<=0?"+":"")+(-(d.getTimezoneOffset()/60));
+}
+setInterval(updateClock,1000);
+updateClock();
+
+/* =========================================================
+   Navigation
+========================================================= */
+const sidebar=document.getElementById("sidebar");
+document.getElementById("hamburger").addEventListener("click",()=>sidebar.classList.toggle("open"));
+
+const titleMap={
+  overview:["Leadership Dashboard","// Command snapshot · all squads"],
+  actions:["Action Queue","// Close loops · execution layer"],
+  roster:["Roster Manager","// Member visibility · risk management"],
+  health:["Squad Health","// Red / Yellow / Green scoreboard"],
+  training:["Training Tracker","// Sessions · attendance · certifications"],
+  events:["Missions & Events","// Planning layer · AAR required post-op"],
+  forms:["Forms Hub","// All Smartsheet forms in one place"],
+  org:["Org Chart","// Command structure · platoons · squads"],
+  sop:["Standards & SOP","// Operational standards · escalation procedures"],
+  resources:["Leader Resources","// Links · forms · responsibilities"],
+  alerts:["Alerts","// Escalation · ownership · action required"]
+};
+
+function openPage(name){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  const pg=document.getElementById("page-"+name);
+  if(pg)pg.classList.add("active");
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  const nav=document.querySelector(`.nav-item[data-page="${name}"]`);
+  if(nav)nav.classList.add("active");
+  const t=titleMap[name]||["Leadership Dashboard","//"];
+  document.getElementById("topTitle").textContent=t[0];
+  document.getElementById("topSub").textContent=t[1];
+  sidebar.classList.remove("open");
+  filterActivePage(document.getElementById("globalSearch").value);
+}
+
+document.querySelectorAll(".nav-item").forEach(item=>{
+  item.addEventListener("click",()=>openPage(item.dataset.page));
+});
+
+function wireNavBtns(){
+  document.querySelectorAll("[data-nav]").forEach(btn=>{
+    btn.addEventListener("click",()=>openPage(btn.getAttribute("data-nav")));
+  });
+}
+
+/* =========================================================
+   KPIs
+========================================================= */
+function computeKPIs(win){
+  const total=members.length;
+  const active=members.filter(m=>m.lastActiveDays!==null&&m.lastActiveDays<=win&&m.status!=="churned").length;
+  const atRisk=members.filter(m=>m.status==="atrisk").length;
+  const pending=members.filter(m=>m.status==="pending").length;
+  const cbComplete=members.filter(m=>m.certs.combatBasics==="complete").length;
+  const cbPct=total?Math.round((cbComplete/total)*100):0;
+  const activeRate=total?Math.round((active/total)*100):0;
+  return[
+    {label:"Total Members",val:total,sub:"Across all squads",badge:`<span class="stat-badge badge-green">Visibility</span>`},
+    {label:"Active Members",val:active,sub:`Seen in last ${win} days`,badge:`<span class="stat-badge badge-green">${activeRate}% activity rate</span>`},
+    {label:"At-Risk",val:atRisk,sub:"No activity 15–30 days",badge:`<span class="stat-badge badge-yellow">Contact required</span>`},
+    {label:"Combat Basics Done",val:cbComplete,sub:`${cbPct}% unit-wide completion`,badge:`<span class="stat-badge badge-dim">Cert coverage</span>`}
+  ];
+}
+
+function renderKPIs(){
+  const win=Number(document.getElementById("overviewTimeWindow").value);
+  const wrap=document.getElementById("kpiStats");
+  wrap.innerHTML=computeKPIs(win).map(k=>`
+    <div class="stat">
+      <div class="stat-label">${k.label}</div>
+      <div class="stat-val">${k.val}</div>
+      <div class="stat-sub">${k.sub}</div>
+      ${k.badge}
+    </div>`).join("");
+}
+
+function renderUpcomingSessions(){
+  const wrap=document.getElementById("upcomingSessions");
+  wrap.innerHTML=trainings.map(t=>{
+    const dm=dayMonth(t.date);
+    const pill=t.type==="cert"?`<span class="pill badge-yellow">Cert</span>`:t.type==="gm"?`<span class="pill badge-blue">GM</span>`:t.type==="advanced"?`<span class="pill badge-dim">Adv</span>`:`<span class="pill">Role</span>`;
+    return`<div class="event" data-tags="training ${t.name} ${t.type} ${t.leader}">
+      <div class="event-date"><div class="event-day">${dm.day}</div><div class="event-month">${dm.month}</div></div>
+      <div class="event-info"><div class="event-name">${t.name}</div><div class="event-meta">Led by: ${t.leader} · Registered: ${Array.isArray(t.registered)?t.registered.length:"All"}</div></div>
+      <div class="event-actions">${pill}<button class="btn" onclick="openSessionDrawer('${t.id}')">Open</button></div>
+    </div>`;
+  }).join("");
+}
+
+function renderCombatCoverage(){
+  const wrap=document.getElementById("combatCoverage");
+  wrap.innerHTML=squads.map(s=>{
+    const ms=members.filter(m=>m.squad===s.id);
+    const total=ms.length||s.members||0;
+    const complete=ms.filter(m=>m.certs.combatBasics==="complete").length;
+    const pct=total?Math.round((complete/total)*100):0;
+    const color=pct>=70?"var(--teal)":pct>=50?"var(--yellow)":"var(--red)";
+    return`<div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;">
+        <span style="color:var(--mid);">${s.name} <span style="color:var(--dim);">(${s.platoon})</span></span>
+        <span style="color:${color};font-family:'Share Tech Mono',monospace;font-size:11px;">${complete}/${total} · ${pct}%</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:linear-gradient(to right,${color},${color})"></div></div>
+    </div>`;
+  }).join("");
+}
+
+function renderCertCoverage(){
+  const wrap=document.getElementById("certCoverage");
+  if(!wrap)return;
+  const certTypes=[{key:"combatBasics",label:"Combat Basics"},{key:"medical",label:"Medical"},{key:"engineering",label:"Engineering"}];
+  wrap.innerHTML=certTypes.map(ct=>{
+    const complete=members.filter(m=>m.certs[ct.key]==="complete").length;
+    const total=members.length;
+    const pct=total?Math.round((complete/total)*100):0;
+    return`<div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;">
+        <span style="color:var(--mid);">${ct.label}</span>
+        <span style="color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:11px;">${complete}/${total} · ${pct}%</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join("");
+}
+
+/* =========================================================
+   Actions
+========================================================= */
+function updateActionCount(){
+  document.getElementById("actionCount").textContent=actions.filter(a=>!a.done).length;
+}
+
+function renderActionPreview(){
+  const wrap=document.getElementById("actionPreview");
+  wrap.innerHTML=actions.slice(0,4).map(a=>`
+    <tr data-tags="action ${a.text} ${a.priority} ${a.owner} ${a.due}">
+      <td style="color:var(--cream);font-weight:700;">${a.text}</td>
+      <td>${pillForPriority(a.priority)}</td>
+      <td>${a.owner}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:10px;color:${a.due==="Overdue"?"var(--red)":"inherit"};">${a.due}</td>
+      <td><div class="check ${a.done?"done":""}" onclick="toggleActionDone('${a.id}',this)">${a.done?"&#10003;":"&#9675;"}</div></td>
+    </tr>`).join("");
+}
+
+function renderActionsTable(){
+  const pr=document.getElementById("actionFilterPriority").value;
+  const st=document.getElementById("actionFilterStatus").value;
+  const filtered=actions.filter(a=>{
+    const okP=(pr==="all")||a.priority===pr;
+    const okS=(st==="all")||(st==="done"?a.done:!a.done);
+    return okP&&okS;
+  });
+  const wrap=document.getElementById("actionTable");
+  if(!wrap)return;
+  wrap.innerHTML=filtered.length?filtered.map(a=>`
+    <tr data-tags="action ${a.text} ${a.priority} ${a.owner} ${a.due}">
+      <td style="color:var(--cream);font-weight:700;">${a.text}</td>
+      <td>${pillForPriority(a.priority)}</td>
+      <td>${a.owner}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:10px;color:${a.due==="Overdue"?"var(--red)":"inherit"};">${a.due}</td>
+      <td><div class="check ${a.done?"done":""}" onclick="toggleActionDone('${a.id}',this)">${a.done?"&#10003;":"&#9675;"}</div></td>
+    </tr>`).join(""):`<tr><td colspan="5" style="text-align:center;color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;">No actions match current filter</td></tr>`;
+}
+
+function toggleActionDone(id,el){
+  const a=actions.find(x=>x.id===id);
+  if(!a)return;
+  a.done=!a.done;
+  el.classList.toggle("done",a.done);
+  el.innerHTML=a.done?"&#10003;":"&#9675;";
+  saveActions();
+  updateActionCount();
+  renderActionPreview();
+  renderActionsTable();
+}
+
+/* Add Action Modal */
+document.getElementById("addActionBtn").addEventListener("click",()=>{
+  document.getElementById("actionModalOverlay").classList.add("open");
+});
+document.getElementById("actionModalClose").addEventListener("click",()=>document.getElementById("actionModalOverlay").classList.remove("open"));
+document.getElementById("actionModalCancel").addEventListener("click",()=>document.getElementById("actionModalOverlay").classList.remove("open"));
+document.getElementById("actionModalSave").addEventListener("click",()=>{
+  const text=document.getElementById("newActionText").value.trim();
+  if(!text)return;
+  const priority=document.getElementById("newActionPriority").value;
+  const owner=document.getElementById("newActionOwner").value.trim()||"Unassigned";
+  const due=document.getElementById("newActionDue").value.trim()||"TBD";
+  const id="a"+Date.now();
+  actions.unshift({id,text,priority,owner,due,done:false});
+  saveActions();
+  updateActionCount();
+  renderActionPreview();
+  renderActionsTable();
+  document.getElementById("newActionText").value="";
+  document.getElementById("newActionOwner").value="";
+  document.getElementById("newActionDue").value="";
+  document.getElementById("actionModalOverlay").classList.remove("open");
+  toast("Action added to queue");
+});
+
+/* =========================================================
+   Roster
+========================================================= */
+function renderRosterFilters(){
+  const sel=document.getElementById("rosterFilterSquad");
+  sel.innerHTML=`<option value="all">Squad: All</option>`+squads.map(s=>`<option value="${s.id}">${s.name}</option>`).join("");
+}
+
+function renderRosterTable(){
+  const squadF=document.getElementById("rosterFilterSquad").value;
+  const statusF=document.getElementById("rosterFilterStatus").value;
+  const roleF=document.getElementById("rosterFilterRole").value;
+  const reviewed=rosterReviewedState();
+  const filtered=members.filter(m=>{
+    const okS=(squadF==="all")||m.squad===squadF;
+    const okSt=(statusF==="all")||m.status===statusF;
+    const okR=(roleF==="all")||m.role===roleF;
+    return okS&&okSt&&okR;
+  });
+  const wrap=document.getElementById("rosterTable");
+  const reviewedKey=m=>`${m.name}|${m.discord}`;
+  wrap.innerHTML=filtered.map(m=>{
+    const k=reviewedKey(m);
+    const isRev=!!reviewed[k];
+    const last=m.lastActiveDays===null?"New":`${m.lastActiveDays}d ago`;
+    return`<tr class="clickable" data-tags="member ${m.name} ${m.discord} ${squadName(m.squad)} ${m.status} ${m.risk} ${m.role} ${m.platform}">
+      <td style="color:var(--cream);font-weight:800;cursor:pointer;" onclick="openMemberModal('${m.name}')">${m.name}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:10px;">${m.discord}</td>
+      <td>${squadName(m.squad)}</td>
+      <td>${rolePill(m.role)}</td>
+      <td><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--mid);">${m.platform}</span></td>
+      <td>${statusPill(m.status)}</td>
+      <td>${certPill(m.certs.combatBasics)}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:10px;">${last}</td>
+      <td>${riskPill(m.risk)}</td>
+      <td><div class="check ${isRev?"done":""}" onclick="toggleReviewed('${k}',this)">${isRev?"&#10003;":"&#9675;"}</div></td>
+    </tr>`;
+  }).join("");
+}
+
+function toggleReviewed(key,el){
+  const st=rosterReviewedState();
+  st[key]=!st[key];
+  saveRosterReviewed(st);
+  el.classList.toggle("done",st[key]);
+  el.innerHTML=st[key]?"&#10003;":"&#9675;";
+}
+
+/* Member Detail Modal */
+function openMemberModal(name){
+  const m=members.find(x=>x.name===name);
+  if(!m)return;
+  document.getElementById("memberModalName").textContent=m.name;
+  document.getElementById("memberModalSub").textContent=`// ${m.discord} · ${squadName(m.squad)} · ${m.role.toUpperCase()}`;
+  const body=document.getElementById("memberModalBody");
+  const last=m.lastActiveDays===null?"New recruit":`${m.lastActiveDays} days ago`;
+  body.innerHTML=`
+    <div class="grid2" style="gap:10px;">
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="info-row"><div class="info-label">Discord</div><div class="info-value">${m.discord}</div></div>
+        <div class="info-row"><div class="info-label">Squad</div><div class="info-value">${squadName(m.squad)}</div></div>
+        <div class="info-row"><div class="info-label">Role</div><div class="info-value">${rolePill(m.role)}</div></div>
+        <div class="info-row"><div class="info-label">Platform</div><div class="info-value">${m.platform}</div></div>
+        <div class="info-row"><div class="info-label">Timezone</div><div class="info-value">${m.timezone}</div></div>
+        <div class="info-row"><div class="info-label">Join Date</div><div class="info-value">${m.joinDate}</div></div>
+        <div class="info-row"><div class="info-label">Last Active</div><div class="info-value">${last}</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="info-row"><div class="info-label">Status</div><div class="info-value">${statusPill(m.status)}</div></div>
+        <div class="info-row"><div class="info-label">Risk</div><div class="info-value">${riskPill(m.risk)}</div></div>
+        <div class="info-row"><div class="info-label">Combat Basics</div><div class="info-value">${certPill(m.certs.combatBasics)}</div></div>
+        <div class="info-row"><div class="info-label">Medical</div><div class="info-value">${certPill(m.certs.medical)}</div></div>
+        <div class="info-row"><div class="info-label">Engineering</div><div class="info-value">${certPill(m.certs.engineering)}</div></div>
+      </div>
+    </div>
+    ${m.notes?`<div style="margin-top:4px;padding:10px 12px;border-radius:12px;border:1px solid rgba(245,158,11,0.22);background:rgba(245,158,11,0.05);"><div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--yellow);margin-bottom:4px;">// Leader Notes</div><div style="font-size:13px;color:var(--mid);line-height:1.55;">${m.notes}</div></div>`:""}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+      <button class="btn" data-link-btn="FORM_ATTENDANCE" onclick="document.getElementById('memberModalOverlay').classList.remove('open')">Log Attendance &#8599;</button>
+      <button class="btn" data-link-btn="FORM_INCIDENT" onclick="document.getElementById('memberModalOverlay').classList.remove('open')">Incident Report &#8599;</button>
+    </div>`;
+  document.getElementById("memberModalOverlay").classList.add("open");
+  // Re-wire link buttons inside modal
+  body.querySelectorAll("[data-link-btn]").forEach(btn=>{
+    const k=btn.getAttribute("data-link-btn");
+    btn.addEventListener("click",()=>{window.open(LINKS[k]||"#","_blank","noopener");});
+  });
+}
+document.getElementById("memberModalClose").addEventListener("click",()=>document.getElementById("memberModalOverlay").classList.remove("open"));
+document.getElementById("memberModalOverlay").addEventListener("click",e=>{if(e.target===document.getElementById("memberModalOverlay"))document.getElementById("memberModalOverlay").classList.remove("open");});
+document.getElementById("memberModalFlag").addEventListener("click",()=>{
+  const name=document.getElementById("memberModalName").textContent;
+  const m=members.find(x=>x.name===name);
+  if(m&&m.status!=="atrisk"){m.status="atrisk";m.risk="medium";toast(`${name} flagged At-Risk`);}
+  document.getElementById("memberModalOverlay").classList.remove("open");
+  renderRosterTable();
+  renderKPIs();
+});
+document.getElementById("memberModalDone").addEventListener("click",()=>{
+  const name=document.getElementById("memberModalName").textContent;
+  const m=members.find(x=>x.name===name);
+  if(m){const k=`${m.name}|${m.discord}`;const st=rosterReviewedState();st[k]=true;saveRosterReviewed(st);toast(`${name} marked reviewed`);}
+  document.getElementById("memberModalOverlay").classList.remove("open");
+  renderRosterTable();
+});
+
+/* =========================================================
+   Squad Health
+========================================================= */
+function computeSquadHealth(){
+  return squads.map(s=>{
+    const ms=members.filter(m=>m.squad===s.id);
+    const total=ms.length||s.members||0;
+    const active=ms.filter(m=>m.lastActiveDays!==null&&m.lastActiveDays<=14&&m.status!=="churned").length;
+    const combat=ms.filter(m=>m.certs.combatBasics==="complete").length;
+    const churned=ms.filter(m=>m.status==="churned").length;
+    const atRisk=ms.filter(m=>m.status==="atrisk").length;
+    const activityRate=total?Math.round((active/total)*100):0;
+    const combatRate=total?Math.round((combat/total)*100):0;
+    let score=Math.round((activityRate*0.5)+(combatRate*0.5));
+    if(churned>0)score=Math.max(0,score-10*churned);
+    if(atRisk>0)score=Math.max(0,score-5*atRisk);
+    score=Math.max(0,Math.min(100,score));
+    const band=score>=70?"green":score>=50?"yellow":"red";
+    return{...s,total,active,combat,churned,atRisk,activityRate,combatRate,score,band};
+  });
+}
+
+function renderHealthScoreboard(){
+  const data=computeSquadHealth();
+  const wrap=document.getElementById("healthScoreboard");
+  wrap.innerHTML=data.map(d=>{
+    const pill=d.band==="green"?`<span class="pill badge-green"><span class="dot dot-green"></span>Green</span>`:d.band==="yellow"?`<span class="pill badge-yellow"><span class="dot dot-yellow"></span>Yellow</span>`:`<span class="pill badge-red"><span class="dot dot-red"></span>Red</span>`;
+    return`<div style="padding:12px;border-radius:14px;border:1px solid rgba(201,168,76,0.14);background:rgba(4,15,7,0.42);margin-bottom:10px;" data-tags="health ${d.name} ${d.platoon} ${d.leader}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div>
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--cream);">${d.name} <span style="color:var(--dim);">· ${d.platoon}</span></div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--mid);text-transform:uppercase;margin-top:4px;">Leader: ${d.leader} · Members: ${d.total} · At-Risk: ${d.atRisk} · Churned: ${d.churned}</div>
+        </div>
+        <div style="text-align:right;">${pill}
+          <div style="margin-top:6px;font-family:'Rajdhani',sans-serif;font-weight:900;font-size:26px;color:var(--gold);line-height:1;">${d.score}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;">health score</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:grid;gap:8px;">
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;"><span style="color:var(--mid);">Activity (14d)</span><span style="color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:11px;">${d.activityRate}%</span></div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:${d.activityRate}%"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;"><span style="color:var(--mid);">Combat Basics</span><span style="color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:11px;">${d.combatRate}%</span></div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:${d.combatRate}%"></div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* =========================================================
+   Training
+========================================================= */
+function renderTrainingSessions(){
+  const typeF=document.getElementById("trainingFilterType").value;
+  const wrap=document.getElementById("trainingSessions");
+  const att=attendanceState();
+  const filtered=trainings.filter(t=>typeF==="all"||t.type===typeF);
+  wrap.innerHTML=filtered.map(t=>{
+    const dm=dayMonth(t.date);
+    const typePill=t.type==="cert"?`<span class="pill badge-yellow">Cert</span>`:t.type==="advanced"?`<span class="pill badge-dim">Advanced</span>`:t.type==="gm"?`<span class="pill badge-blue">GM</span>`:`<span class="pill">Role</span>`;
+    const key=`session:${t.id}`;
+    const marked=att[key]?Object.values(att[key]).filter(Boolean).length:0;
+    const total=Array.isArray(t.registered)?t.registered.length:0;
+    return`<div class="event" data-tags="training ${t.name} ${t.type} ${t.leader} ${t.date}">
+      <div class="event-date"><div class="event-day">${dm.day}</div><div class="event-month">${dm.month}</div></div>
+      <div class="event-info">
+        <div class="event-name">${t.name}</div>
+        <div class="event-meta">Led by: ${t.leader} · Registered: ${total} · Marked: ${marked}/${total}</div>
+      </div>
+      <div class="event-actions">
+        ${typePill}
+        <button class="btn" data-link-btn="FORM_TRAINING_REG">Reg Form &#8599;</button>
+        <button class="btn primary" onclick="openSessionDrawer('${t.id}')">Attendance</button>
+      </div>
+    </div>`;
+  }).join("");
+  // re-wire link buttons
+  wrap.querySelectorAll("[data-link-btn]").forEach(btn=>{
+    const k=btn.getAttribute("data-link-btn");
+    btn.addEventListener("click",()=>window.open(LINKS[k]||"#","_blank","noopener"));
+  });
+}
+
+/* Drawer */
+const drawerOverlay=document.getElementById("drawerOverlay");
+const drawer=document.getElementById("drawer");
+let activeSessionId=null;
+
+function openDrawer(){drawerOverlay.classList.add("open");drawer.classList.add("open");}
+function closeDrawer(){drawerOverlay.classList.remove("open");drawer.classList.remove("open");activeSessionId=null;}
+drawerOverlay.addEventListener("click",closeDrawer);
+document.getElementById("drawerClose").addEventListener("click",closeDrawer);
+
+document.getElementById("drawerAARBtn").addEventListener("click",()=>window.open(LINKS.FORM_AAR||"#","_blank","noopener"));
+
+function openSessionDrawer(id){
+  const s=trainings.find(x=>x.id===id);
+  if(!s)return;
+  activeSessionId=id;
+  document.getElementById("drawerTitle").textContent=s.name;
+  document.getElementById("drawerSub").textContent=`// ${fmtDate(s.date)} · ${s.leader} · ${s.type.toUpperCase()}`;
+  const state=attendanceState();
+  const key=`session:${s.id}`;
+  const saved=state[key]||{};
+  let listHtml="";
+  if(Array.isArray(s.registered)&&s.registered.length){
+    listHtml=s.registered.map(name=>{
+      const chk=!!saved[name];
+      return`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid rgba(201,168,76,0.14);background:rgba(4,15,7,0.42);" data-tags="attendance ${name}">
+        <div>
+          <div style="font-weight:800;color:var(--cream);">${name}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--mid);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Status: ${chk?"Attended":"Not Marked"}</div>
+        </div>
+        <div class="check ${chk?"done":""}" data-attendee="${name}" onclick="toggleAttendee(this)">${chk?"&#10003;":"&#9675;"}</div>
+      </div>`;
+    }).join("");
+  }else{
+    listHtml=`<div style="color:var(--mid);line-height:1.6;">No registrants listed yet.</div>`;
+  }
+  document.getElementById("drawerBody").innerHTML=`
+    <div style="padding:12px;border-radius:14px;border:1px solid rgba(201,168,76,0.14);background:rgba(201,168,76,0.05);">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);">// Quick Summary</div>
+      <div style="margin-top:8px;color:var(--mid);font-size:13px;line-height:1.6;">Mark attendance then save. Submit the Attendance Log form to Smartsheet after saving. Required within 24h.</div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn" onclick="window.open(LINKS.FORM_ATTENDANCE||'#','_blank','noopener')">&#128203; Attendance Form &#8599;</button>
+        <button class="btn" onclick="window.open(LINKS.FORM_AAR||'#','_blank','noopener')">&#128196; AAR Form &#8599;</button>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-family:'Rajdhani',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;">Attendance</div>
+      <div class="pill">${Array.isArray(s.registered)?s.registered.length:0} registered</div>
+    </div>
+    ${listHtml}`;
+  openDrawer();
+}
+
+function toggleAttendee(el){
+  el.classList.toggle("done");
+  el.innerHTML=el.classList.contains("done")?"&#10003;":"&#9675;";
+}
+
+document.getElementById("drawerSave").addEventListener("click",()=>{
+  if(!activeSessionId)return;
+  const s=trainings.find(x=>x.id===activeSessionId);
+  if(!s)return;
+  const st=attendanceState();
+  const key=`session:${s.id}`;
+  st[key]=st[key]||{};
+  document.getElementById("drawerBody").querySelectorAll("[data-attendee]").forEach(btn=>{
+    st[key][btn.getAttribute("data-attendee")]=btn.classList.contains("done");
+  });
+  saveAttendance(st);
+  renderTrainingSessions();
+  renderUpcomingSessions();
+  closeDrawer();
+  toast("Attendance saved locally");
+});
+
+document.getElementById("drawerReset").addEventListener("click",()=>{
+  if(!activeSessionId)return;
+  const s=trainings.find(x=>x.id===activeSessionId);
+  if(!s)return;
+  const st=attendanceState();
+  st[`session:${s.id}`]={};
+  saveAttendance(st);
+  openSessionDrawer(activeSessionId);
+});
+
+/* =========================================================
+   Events
+========================================================= */
+function renderEvents(){
+  document.getElementById("gmPipeline").innerHTML=missionPipeline.map(e=>{
+    const pill=e.status==="ready"?`<span class="pill badge-green">Ready</span>`:e.status==="dev"?`<span class="pill badge-yellow">In Dev</span>`:`<span class="pill badge-dim">Needed</span>`;
+    return`<div class="event" data-tags="mission ${e.name} ${e.meta} ${e.status}">
+      <div class="event-date"><div class="event-day">${e.day}</div><div class="event-month">${e.month}</div></div>
+      <div class="event-info"><div class="event-name">${e.name}</div><div class="event-meta">${e.meta}</div></div>
+      <div class="event-actions">${pill}<button class="btn">Edit</button></div>
+    </div>`;
+  }).join("");
+  document.getElementById("compEvents").innerHTML=competitiveEvents.map(e=>{
+    const pill=e.status==="confirmed"?`<span class="pill badge-green">Confirmed</span>`:e.status==="open"?`<span class="pill badge-dim">Open</span>`:`<span class="pill badge-yellow">In Prep</span>`;
+    return`<div class="event" data-tags="competition ${e.name} ${e.meta} ${e.status}">
+      <div class="event-date"><div class="event-day">${e.day}</div><div class="event-month">${e.month}</div></div>
+      <div class="event-info"><div class="event-name">${e.name}</div><div class="event-meta">${e.meta}</div></div>
+      <div class="event-actions">${pill}<button class="btn">Notes</button></div>
+    </div>`;
+  }).join("");
+}
+
+/* =========================================================
+   Org Chart
+========================================================= */
+function renderOrgChart(){
+  const platoons=[
+    {id:"p1",name:"Platoon 1",leader:"[Platoon Leader]",squads:squads.filter(s=>s.platoon==="Platoon 1")},
+    {id:"p2",name:"Platoon 2",leader:"[Platoon Leader]",squads:squads.filter(s=>s.platoon==="Platoon 2")}
+  ];
+  document.getElementById("orgChart").innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+      <div style="border-radius:16px;border:1px solid rgba(201,168,76,0.40);background:rgba(201,168,76,0.10);padding:16px 24px;text-align:center;min-width:260px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);">Commander</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-top:6px;color:var(--cream);font-size:18px;">gonzale20</div>
+      </div>
+      <div style="width:2px;height:22px;background:rgba(201,168,76,0.35);"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;width:100%;">
+        ${platoons.map(p=>`
+          <div style="border-radius:16px;border:1px solid rgba(201,168,76,0.18);background:rgba(4,15,7,0.42);padding:12px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
               <div>
-                <b>${name}</b>
-                <div class="tiny">status: ${checked ? "attended" : "not marked"}</div>
+                <div style="font-family:'Rajdhani',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--gold);">${p.name}</div>
+                <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-top:4px;">Leader: ${p.leader}</div>
               </div>
-              <div class="check ${checked ? "done" : ""}" data-name="${name}" onclick="toggleCheck(this)">${checked ? "✓" : "○"}</div>
+              <button class="btn" style="padding:8px 10px;border-radius:12px;font-size:11px;" onclick="togglePlatoon('${p.id}',this)">Expand</button>
             </div>
-          `;
-        }).join("")}
-      `;
+            <div id="platoon-${p.id}" style="display:none;flex-direction:column;gap:8px;margin-top:10px;">
+              ${p.squads.map(s=>`
+                <div style="border-radius:12px;border:1px solid rgba(201,168,76,0.12);background:rgba(10,38,24,0.65);padding:10px 12px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                    <div>
+                      <div style="font-weight:900;color:var(--cream);letter-spacing:1px;text-transform:uppercase;">${s.name}</div>
+                      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--mid);letter-spacing:1px;text-transform:uppercase;margin-top:3px;">SL: ${s.leader} · ${s.members} members</div>
+                    </div>
+                    <button class="btn" style="padding:8px 10px;border-radius:10px;font-size:11px;" onclick="openPage('roster');document.getElementById('rosterFilterSquad').value='${s.id}';renderRosterTable();">Roster</button>
+                  </div>
+                </div>`).join("")}
+            </div>
+          </div>`).join("")}
+      </div>
+      <div style="margin-top:8px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">// Update placeholder names after leadership meeting</div>
+    </div>`;
+}
+function togglePlatoon(id,btn){
+  const el=document.getElementById("platoon-"+id);
+  const open=el.style.display!=="none"&&el.style.display!=="";
+  el.style.display=open?"none":"flex";
+  btn.textContent=open?"Expand":"Collapse";
+}
 
-      modalSave.onclick = ()=>{
-        const st = getAttendanceState();
-        st[key] = st[key] || {};
-        modalBody.querySelectorAll("[data-name]").forEach(btn=>{
-          const n = btn.getAttribute("data-name");
-          st[key][n] = btn.classList.contains("done");
-        });
-        saveAttendanceState(st);
-        closeModal();
-        renderTraining();
-      };
+/* =========================================================
+   Alerts
+========================================================= */
+function updateAlertCount(){
+  document.getElementById("alertCount").textContent=alerts.filter(a=>!a.dismissed).length;
+}
 
-      modalReset.onclick = ()=>{
-        const st = getAttendanceState();
-        st[key] = {};
-        saveAttendanceState(st);
-        openAttendance(trainingId);
-      };
-
-      openModal();
-    }
-
-    function toggleCheck(el){
-      el.classList.toggle("done");
-      el.textContent = el.classList.contains("done") ? "✓" : "○";
-    }
-
-    /***************************************************************
-     * 9) RENDER: MISSIONS
-     ***************************************************************/
-    function renderMissions(){
-      const active = missions.filter(m=>String(m.status).toLowerCase()==="active").length;
-      const completed = missions.filter(m=>String(m.status).toLowerCase()==="completed").length;
-      const successRate = 98; // placeholder
-
-      const cards = [
-        { title:"Active Missions", badge:String(active), value:String(active), label:"Currently Deployed", pct:percent(active, Math.max(1, active+completed)) },
-        { title:"Completed This Month", badge:String(completed), value:String(completed), label:"Successful Operations", pct:percent(completed, Math.max(1, active+completed)) },
-        { title:"Success Rate", badge:`${successRate}%`, value:`${successRate}%`, label:"Mission Success", pct:successRate },
-      ];
-
-      document.getElementById("missionSummary").innerHTML = cards.map(c=>`
-        <div class="card" data-searchable="true">
-          <div class="card-header">
-            <div class="card-title">${c.title}</div>
-            <div class="card-badge">${c.badge}</div>
-          </div>
-          <div class="stat-value">${c.value}</div>
-          <div class="stat-label">${c.label}</div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${c.pct}%;"></div></div>
+function renderAlerts(){
+  const filter=document.getElementById("alertFilter")?document.getElementById("alertFilter").value:"all";
+  const wrap=document.getElementById("alertList");
+  const active=alerts.filter(a=>!a.dismissed&&(filter==="all"||a.level===filter));
+  if(!active.length){
+    wrap.innerHTML=`<div style="text-align:center;padding:22px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);">// No active alerts matching filter</div>`;
+    return;
+  }
+  wrap.innerHTML=active.map(a=>{
+    const pill=a.level==="red"?`<span class="pill badge-red"><span class="dot dot-red"></span>Critical</span>`:a.level==="yellow"?`<span class="pill badge-yellow"><span class="dot dot-yellow"></span>Warning</span>`:`<span class="pill badge-green"><span class="dot dot-green"></span>Info</span>`;
+    return`<div style="border-radius:14px;border:1px solid rgba(201,168,76,0.14);background:rgba(4,15,7,0.42);padding:14px;margin-bottom:10px;" data-tags="alert ${a.level} ${a.title} ${a.detail}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:900;color:var(--cream);margin-bottom:4px;">${a.title}</div>
+          <div style="color:var(--mid);font-size:13px;line-height:1.55;">${a.detail}</div>
+          <div style="margin-top:6px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);">Owner: ${a.owner}</div>
         </div>
-      `).join("");
-
-      document.getElementById("missionTable").innerHTML = missions.map(m=>`
-        <tr data-searchable="true">
-          <td>${m.id}</td>
-          <td><b>${m.objective}</b></td>
-          <td>${squadLabel(m.squad)}</td>
-          <td>${m.start}</td>
-          <td><span class="${badgeForStatus(m.status)}">${m.status}</span></td>
-          <td>${m.completion}%</td>
-        </tr>
-      `).join("");
-
-      document.getElementById("btnNewMission").onclick = ()=>{
-        alert("V1: New mission creation is a placeholder. In V2 we can add a form + Smartsheet writeback.");
-      };
-    }
-
-    /***************************************************************
-     * 10) RENDER: SQUAD HEALTH (no hierarchy)
-     ***************************************************************/
-    function renderSquadHealth(){
-      const platoon = document.getElementById("filterHealthPlatoon").value || "all";
-
-      // calculate per squad
-      const rows = squads
-        .filter(s => platoon==="all" ? true : s.platoon === platoon)
-        .map(s=>{
-          const ms = members.filter(m=>m.squad===s.id);
-          const total = ms.length || 0;
-          const active = ms.filter(m=>m.status==="active" && (m.lastActiveDays===null ? false : m.lastActiveDays<=14)).length;
-          const combat = ms.filter(m=>m.combat==="complete").length;
-          const inactive = ms.filter(m=>m.status==="inactive" || (m.lastActiveDays!==null && m.lastActiveDays>30)).length;
-
-          const activityPct = percent(active, Math.max(1,total));
-          const combatPct = percent(combat, Math.max(1,total));
-          const score = Math.round((activityPct*0.55) + (combatPct*0.45) - (inactive>0 ? 10 : 0));
-
-          let status = "Green";
-          if(score < 50) status = "Red";
-          else if(score < 70) status = "Yellow";
-
-          return { squad:s, total, active, combat, inactive, activityPct, combatPct, score, status };
-        });
-
-      document.getElementById("healthGrid").innerHTML = rows.map(r=>{
-        const badge =
-          r.status==="Green" ? `<span class="status-badge status-active">Green</span>` :
-          r.status==="Yellow" ? `<span class="status-badge status-pending">Yellow</span>` :
-          `<span class="status-badge status-inactive">Red</span>`;
-
-        return `
-          <div class="card" data-searchable="true">
-            <div class="card-header">
-              <div class="card-title">${r.squad.name} · ${r.squad.platoon}</div>
-              <div class="card-badge">${r.score}</div>
-            </div>
-
-            <div class="row" style="justify-content:space-between;">
-              <div class="tiny">Leader: <b>${r.squad.leader}</b></div>
-              ${badge}
-            </div>
-
-            <div class="tiny">Members: <b>${r.total}</b> · Active(14d): <b>${r.active}</b> · Inactive: <b>${r.inactive}</b></div>
-
-            <div class="tiny" style="margin-top:12px;">Activity (14d): <b>${r.activityPct}%</b></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:${r.activityPct}%;"></div></div>
-
-            <div class="tiny" style="margin-top:12px;">Combat Basics: <b>${r.combatPct}%</b></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:${r.combatPct}%;"></div></div>
-
-            <div class="row" style="margin-top:12px;">
-              <button class="btn btn-secondary btn-small" onclick="jumpToRoster('${r.squad.id}')">View Squad Roster</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      document.getElementById("filterHealthPlatoon").onchange = renderSquadHealth;
-    }
-
-    function jumpToRoster(squadId){
-      showPage("roster", document.querySelector('[data-page="roster"]'));
-      document.getElementById("filterSquad").value = squadId;
-      renderRoster();
-      applySearchFilter();
-    }
-
-    /***************************************************************
-     * 11) RENDER: RESOURCES
-     ***************************************************************/
-    function renderResources(){
-      const cards = [
-        { title:"Equipment Inventory", badge:"847", value:"847", label:"Total Items", pct:88 },
-        { title:"Budget Allocation", badge:"$125K", value:"$125K", label:"Monthly Budget", pct:75 },
-        { title:"Maintenance Status", badge:"94%", value:"94%", label:"Equipment Ready", pct:94 },
-      ];
-
-      document.getElementById("resourceSummary").innerHTML = cards.map(c=>`
-        <div class="card" data-searchable="true">
-          <div class="card-header">
-            <div class="card-title">${c.title}</div>
-            <div class="card-badge">${c.badge}</div>
-          </div>
-          <div class="stat-value">${c.value}</div>
-          <div class="stat-label">${c.label}</div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${c.pct}%;"></div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+          ${pill}
+          <button class="btn" style="padding:6px 10px;border-radius:10px;font-size:10px;" onclick="dismissAlert('${a.id}')">Dismiss</button>
         </div>
-      `).join("");
+      </div>
+    </div>`;
+  }).join("");
+}
 
-      document.getElementById("resourceTable").innerHTML = resources.map(r=>`
-        <tr data-searchable="true">
-          <td><b>${r.name}</b></td>
-          <td>${r.purpose}</td>
-          <td>${r.owner}</td>
-          <td><a class="btn btn-secondary btn-small" href="${r.link}" target="_blank" rel="noopener">Open ↗</a></td>
-        </tr>
-      `).join("");
-    }
+function dismissAlert(id){
+  const a=alerts.find(x=>x.id===id);
+  if(a){a.dismissed=true;saveAlerts();renderAlerts();updateAlertCount();toast("Alert dismissed");}
+}
 
-    /***************************************************************
-     * 12) RENDER: ALERTS
-     ***************************************************************/
-    function renderAlerts(){
-      document.getElementById("alertCount").textContent = String(alerts.length);
+/* =========================================================
+   Global Search
+========================================================= */
+function filterActivePage(query){
+  const q=(query||"").trim().toLowerCase();
+  const active=document.querySelector(".page.active");
+  if(!active)return;
+  const nodes=active.querySelectorAll("[data-tags]");
+  if(!q){nodes.forEach(n=>n.style.display="");return;}
+  nodes.forEach(n=>{
+    const t=(n.getAttribute("data-tags")||"").toLowerCase();
+    const txt=(n.textContent||"").toLowerCase();
+    n.style.display=(t.includes(q)||txt.includes(q))?"":"none";
+  });
+}
+document.getElementById("globalSearch").addEventListener("input",e=>filterActivePage(e.target.value));
 
-      const alertHtml = alerts.map(a=>{
-        const cls =
-          a.type==="success" ? "alert alert-success" :
-          a.type==="warning" ? "alert alert-warning" :
-          a.type==="danger" ? "alert alert-danger" :
-          "alert alert-info";
+/* =========================================================
+   Toast notification
+========================================================= */
+function toast(msg){
+  const sub=document.getElementById("topSub");
+  const prev=sub.textContent;
+  sub.textContent=`// ${msg}`;
+  setTimeout(()=>sub.textContent=prev,2200);
+}
 
-        const icon =
-          a.type==="success" ? "✓" :
-          a.type==="warning" ? "⚠" :
-          a.type==="danger" ? "⛔" :
-          "ℹ";
+/* =========================================================
+   Export CSV
+========================================================= */
+document.getElementById("exportBtn").addEventListener("click",()=>{
+  const rows=[["Name","Discord","Squad","Role","Platform","Timezone","Status","Combat Basics","Medical","Engineering","Last Active (days)","Risk","Join Date"]];
+  members.forEach(m=>rows.push([m.name,m.discord,squadName(m.squad),m.role,m.platform,m.timezone,m.status,m.certs.combatBasics,m.certs.medical,m.certs.engineering,m.lastActiveDays??"New",m.risk,m.joinDate]));
+  const csv=rows.map(r=>r.map(x=>String(x).replaceAll('"','""')).map(x=>`"${x}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8;"}));
+  a.download="regiment_roster_export.csv";
+  document.body.appendChild(a);a.click();a.remove();
+  toast("Roster exported to CSV");
+});
 
-        return `
-          <div class="${cls}" data-searchable="true">
-            <span style="font-weight:900;">${icon}</span>
-            <div>
-              <strong>${a.title}</strong>
-              <p>${a.msg}</p>
-              <div class="tiny" style="margin-top:6px;">${a.when}</div>
-            </div>
-          </div>
-        `;
-      }).join("");
+/* =========================================================
+   Misc buttons
+========================================================= */
+document.getElementById("newTrainingBtn").addEventListener("click",()=>{openPage("training");toast("Open + Schedule Training to set up a new session");});
+document.getElementById("scheduleTrainingBtn").addEventListener("click",()=>toast("Training scheduling form — connect Smartsheet form link in LINKS.FORM_TRAINING_REG"));
 
-      document.getElementById("alertsList").innerHTML = alertHtml;
+document.getElementById("overviewTimeWindow").addEventListener("change",()=>{renderKPIs();});
+document.getElementById("actionFilterPriority").addEventListener("change",renderActionsTable);
+document.getElementById("actionFilterStatus").addEventListener("change",renderActionsTable);
+document.getElementById("rosterFilterSquad").addEventListener("change",renderRosterTable);
+document.getElementById("rosterFilterStatus").addEventListener("change",renderRosterTable);
+document.getElementById("rosterFilterRole").addEventListener("change",renderRosterTable);
+document.getElementById("trainingFilterType").addEventListener("change",renderTrainingSessions);
+if(document.getElementById("alertFilter"))document.getElementById("alertFilter").addEventListener("change",renderAlerts);
 
-      document.getElementById("alertHistory").innerHTML = alertHistory.map(h=>`
-        <tr data-searchable="true">
-          <td>${h.date}</td>
-          <td>${h.type}</td>
-          <td>${h.message}</td>
-          <td><span class="${badgeForStatus(h.severity)}">${h.severity}</span></td>
-          <td>${h.status}</td>
-        </tr>
-      `).join("");
-    }
-
-    /***************************************************************
-     * 13) GLOBAL SEARCH (filters current page)
-     ***************************************************************/
-    function applySearchFilter(){
-      const q = (document.getElementById("globalSearch").value || "").trim().toLowerCase();
-      const activePage = document.querySelector(".page.active");
-      if(!activePage) return;
-
-      const nodes = activePage.querySelectorAll("[data-searchable='true'], tr[data-searchable='true']");
-      if(!q){
-        nodes.forEach(n=>n.style.display = "");
-        return;
-      }
-      nodes.forEach(n=>{
-        const text = (n.textContent || "").toLowerCase();
-        n.style.display = text.includes(q) ? "" : "none";
-      });
-    }
-    document.getElementById("globalSearch").addEventListener("input", applySearchFilter);
-
-    /***************************************************************
-     * 14) RENDER ROUTER
-     ***************************************************************/
-    function renderPage(pageId){
-      if(pageId==="dashboard") renderDashboard();
-      if(pageId==="roster") renderRoster();
-      if(pageId==="training") renderTraining();
-      if(pageId==="missions") renderMissions();
-      if(pageId==="squadhealth") renderSquadHealth();
-      if(pageId==="resources") renderResources();
-      if(pageId==="alerts") renderAlerts();
-    }
-
-    /***************************************************************
-     * 15) FILTER WIRES
-     ***************************************************************/
-    document.getElementById("filterSquad").addEventListener("change", renderRoster);
-    document.getElementById("filterStatus").addEventListener("change", renderRoster);
-    document.getElementById("filterCombat").addEventListener("change", renderRoster);
-
-    document.getElementById("filterTrainingType").addEventListener("change", renderTraining);
-
-    /***************************************************************
-     * 16) TIME UPDATE
-     ***************************************************************/
-    function updateTime(){
-      const now = new Date();
-      const timeString = now.toLocaleString('en-US', {
-        year:'numeric', month:'2-digit', day:'2-digit',
-        hour:'2-digit', minute:'2-digit', hour12:false
-      });
-      document.getElementById('lastUpdate').textContent = timeString;
-    }
-    updateTime();
-    setInterval(updateTime, 60000);
-
-    /***************************************************************
-     * 17) INITIAL RENDER
-     ***************************************************************/
-    renderAlerts();              // ensures badge is correct
-    renderDashboard();           // default page
-    applySearchFilter();
-  </script>
+/* =========================================================
+   Init
+========================================================= */
+function init(){
+  applyLinks();
+  updateActionCount();
+  updateAlertCount();
+  renderKPIs();
+  renderUpcomingSessions();
+  renderCombatCoverage();
+  renderCertCoverage();
+  renderActionPreview();
+  renderActionsTable();
+  renderRosterFilters();
+  renderRosterTable();
+  renderHealthScoreboard();
+  renderTrainingSessions();
+  renderEvents();
+  renderOrgChart();
+  renderAlerts();
+  wireNavBtns();
+}
+init();
+</script>
 </body>
 </html>
