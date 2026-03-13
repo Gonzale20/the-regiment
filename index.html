@@ -1,1153 +1,1370 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>The Regiment — Command Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Regiment — Recruit Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#040f07;
-  --bg2:#071409;
-  --bg3:rgba(10,38,24,0.78);
-  --bg4:rgba(10,38,24,0.92);
-  --gold:#C9A84C;
-  --gold-l:#e2c06a;
-  --gold-d:#9a7a2e;
-  --cream:#f0e8d0;
-  --dim:#7a9e85;
-  --mid:#a8c4ac;
-  --border:rgba(201,168,76,0.18);
-  --border-b:rgba(201,168,76,0.55);
-  --shadow:0 18px 50px rgba(0,0,0,.45);
-  --r:16px;
-  --r2:12px;
-  --blur:blur(18px);
-  --complete:#4caf7a;
+/* ============================================================
+   REGIMENT ONBOARDING — TACTICAL HUD TERMINAL
+   ============================================================ */
+:root {
+  --bg:#030e05;--bg2:#060f07;--bg3:#091409;--bg4:#0c1c0d;
+  --gold:#C9A84C;--gold-dim:#7a6228;--gold-mid:#a8883c;--gold-bright:#e8c86a;
+  --gold-glow:rgba(201,168,76,0.35);--gold-glow-sm:rgba(201,168,76,0.1);
+  --cream:#f0e8d0;--cream-dim:#9a8e72;--cream-faint:#504838;
+  --border:rgba(201,168,76,0.18);--border-mid:rgba(201,168,76,0.38);--border-hot:rgba(201,168,76,0.65);
+  --complete:#4ccc82;--complete-glow:rgba(76,204,130,0.22);
+  --red:#c94c4c;--purple:#7c4cf0;
+  --sidebar-w:290px;--nav-h:58px;--brk:10px;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;}
-body{background:var(--bg);color:var(--cream);font-family:'Exo 2',sans-serif;overflow-x:hidden;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--cream);font-family:'Exo 2',sans-serif;min-height:100vh;overflow-x:hidden}
 
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:linear-gradient(rgba(201,168,76,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.025) 1px,transparent 1px);
-  background-size:42px 42px;pointer-events:none;z-index:0;
+/* Grid — two scales */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(201,168,76,.032) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(201,168,76,.032) 1px,transparent 1px),
+    linear-gradient(rgba(201,168,76,.01) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(201,168,76,.01) 1px,transparent 1px);
+  background-size:80px 80px,80px 80px,20px 20px,20px 20px}
+
+/* Scanlines */
+body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px)}
+
+/* Vignette */
+.vignette{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 88% 80% at 55% 40%,transparent 30%,rgba(0,0,0,.5) 100%)}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--nav-h);
+  background:rgba(3,14,5,.97);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 2rem;
+  backdrop-filter:blur(16px)}
+nav::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.7}
+
+.nav-brand{font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;
+  color:var(--gold);letter-spacing:4px;text-transform:uppercase;text-decoration:none;
+  display:flex;align-items:center;gap:.6rem}
+.nav-brand::before{content:'';display:inline-block;width:6px;height:6px;background:var(--gold);
+  transform:rotate(45deg);animation:dp 2.5s ease-in-out infinite}
+@keyframes dp{0%,100%{opacity:1;transform:rotate(45deg) scale(1)}50%{opacity:.3;transform:rotate(45deg) scale(.65)}}
+
+.nav-center{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;
+  gap:.5rem;font-family:'Share Tech Mono',monospace;font-size:.53rem;letter-spacing:3px;
+  color:var(--cream-faint);text-transform:uppercase}
+.nav-status-dot{width:5px;height:5px;border-radius:50%;background:var(--complete);
+  animation:blink 1.8s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+
+.nav-right{display:flex;align-items:center;gap:2rem}
+.nav-right a{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:2.5px;
+  color:var(--cream-faint);text-decoration:none;text-transform:uppercase;transition:color .2s;position:relative}
+.nav-right a::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;
+  background:var(--gold);transform:scaleX(0);transition:transform .25s;transform-origin:left}
+.nav-right a:hover{color:var(--gold)}
+.nav-right a:hover::after{transform:scaleX(1)}
+
+/* ── LAYOUT ── */
+.layout{display:flex;padding-top:var(--nav-h);min-height:100vh;position:relative;z-index:2}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);position:fixed;top:var(--nav-h);left:0;bottom:0;
+  background:rgba(4,10,5,.97);border-right:1px solid var(--border);overflow-y:auto;
+  z-index:100;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border)}
+
+.sidebar-header{padding:1.4rem 1.4rem 1.2rem;border-bottom:1px solid var(--border);position:relative}
+.sidebar-header::before{content:'';position:absolute;top:8px;right:8px;width:12px;height:12px;
+  border-top:1px solid var(--gold-mid);border-right:1px solid var(--gold-mid);opacity:.45}
+
+.sidebar-designation{font-family:'Share Tech Mono',monospace;font-size:.5rem;letter-spacing:4px;
+  color:var(--gold);text-transform:uppercase;margin-bottom:.25rem;opacity:.65}
+.sidebar-title{font-family:'Rajdhani',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--cream);margin-bottom:1rem}
+
+/* Segmented progress */
+.seg-progress-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.seg-label-txt{font-family:'Share Tech Mono',monospace;font-size:.51rem;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase}
+.seg-pct{font-family:'Share Tech Mono',monospace;font-size:.53rem;letter-spacing:1px;color:var(--gold)}
+.seg-blocks{display:flex;gap:3px}
+.seg-block{flex:1;height:6px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.18);transition:all .35s}
+.seg-block.lit{background:var(--gold);border-color:var(--gold);box-shadow:0 0 6px rgba(201,168,76,.45)}
+.seg-block.half-lit{background:var(--gold-dim);border-color:var(--gold-mid)}
+.sys-status{display:flex;align-items:center;gap:.5rem;margin-top:.7rem;font-family:'Share Tech Mono',monospace;
+  font-size:.48rem;letter-spacing:2px;color:var(--cream-faint);text-transform:uppercase}
+.sys-dot{width:4px;height:4px;border-radius:50%;background:var(--complete);animation:blink 2s step-end infinite;flex-shrink:0}
+
+/* Step list */
+.step-list{padding:.5rem 0;flex:1}
+.step-item{display:flex;align-items:center;gap:.85rem;padding:.72rem 1.4rem;cursor:pointer;
+  border-left:2px solid transparent;transition:background .15s,border-color .15s;position:relative}
+.step-item:hover{background:rgba(201,168,76,.04)}
+.step-item.active{background:rgba(201,168,76,.06);border-left-color:var(--gold)}
+.step-item.active::before{content:'';position:absolute;right:10px;top:50%;
+  transform:translateY(-50%) rotate(45deg);width:5px;height:5px;background:var(--gold);opacity:.55}
+.step-item.done{opacity:.58}
+.step-item.done:hover{opacity:.9}
+
+/* Diamond indicator */
+.step-num{width:24px;height:24px;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center}
+.step-num::before{content:'';position:absolute;inset:2px;transform:rotate(45deg);
+  background:var(--bg);border:1px solid var(--border-mid);transition:all .3s}
+.step-num-inner{position:relative;z-index:1;font-family:'Share Tech Mono',monospace;
+  font-size:.56rem;color:var(--cream-dim);transition:color .3s;line-height:1}
+.step-item.active .step-num::before{background:var(--gold);border-color:var(--gold);box-shadow:0 0 10px rgba(201,168,76,.4)}
+.step-item.active .step-num-inner{color:var(--bg);font-weight:700}
+.step-item.done .step-num::before{background:var(--complete);border-color:var(--complete);box-shadow:0 0 7px var(--complete-glow)}
+.step-item.done .step-num-inner{color:var(--bg)}
+
+.step-text{flex:1;min-width:0}
+.step-title{font-family:'Rajdhani',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.5px;
+  color:var(--cream-dim);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .2s}
+.step-item.active .step-title,.step-item:hover .step-title{color:var(--cream)}
+.step-tag{font-family:'Share Tech Mono',monospace;font-size:.48rem;letter-spacing:1.5px;
+  color:var(--cream-faint);text-transform:uppercase;margin-top:.15rem}
+.step-item.active .step-tag{color:var(--gold);opacity:.7}
+.step-divider{height:1px;background:var(--border);margin:.4rem 1.4rem;opacity:.5}
+
+.sidebar-footer{padding:1rem 1.4rem;border-top:1px solid var(--border)}
+.reset-btn{width:100%;font-family:'Share Tech Mono',monospace;font-size:.53rem;letter-spacing:2.5px;
+  text-transform:uppercase;padding:.5rem;background:transparent;border:1px solid var(--border);
+  color:var(--cream-faint);cursor:pointer;transition:all .2s}
+.reset-btn:hover{border-color:rgba(201,168,76,.3);color:var(--cream-dim)}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar-w);flex:1;padding:2.5rem 3rem 6rem;max-width:calc(940px + var(--sidebar-w));position:relative}
+
+/* Panel animation */
+.step-panel{display:none}
+.step-panel.active{display:block;animation:panel-sweep .35s cubic-bezier(.25,.46,.45,.94) both}
+@keyframes panel-sweep{from{opacity:0;transform:translateX(-12px);filter:blur(3px)}to{opacity:1;transform:translateX(0);filter:blur(0)}}
+
+/* Panel header */
+.panel-header{margin-bottom:2.5rem;padding-bottom:1.8rem;border-bottom:1px solid var(--border);position:relative}
+.panel-header::before{content:'';position:absolute;top:0;left:-1.5rem;width:18px;height:18px;
+  border-top:1px solid var(--gold-mid);border-left:1px solid var(--gold-mid);opacity:.45}
+.panel-header::after{content:'';position:absolute;bottom:0;right:0;width:18px;height:18px;
+  border-bottom:1px solid var(--gold-mid);border-right:1px solid var(--gold-mid);opacity:.28}
+
+.panel-step-tag{font-family:'Share Tech Mono',monospace;font-size:.56rem;letter-spacing:3.5px;
+  color:var(--gold);text-transform:uppercase;margin-bottom:.7rem;opacity:.8;display:flex;align-items:center;gap:.8rem}
+.panel-step-tag::after{content:'';flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,var(--border-mid),transparent)}
+
+.panel-title{font-family:'Rajdhani',sans-serif;font-size:clamp(2rem,4.5vw,2.8rem);font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;color:var(--cream);line-height:1.05;
+  animation:title-in .4s .1s cubic-bezier(.25,.46,.45,.94) both}
+@keyframes title-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.panel-title span{color:var(--gold)}
+.panel-desc{margin-top:.9rem;color:var(--cream-dim);font-size:.89rem;line-height:1.75;max-width:640px;
+  animation:title-in .4s .2s both}
+
+/* Content cards */
+.content-card{background:rgba(7,18,8,.88);border:1px solid var(--border);
+  padding:1.8rem;margin-bottom:1.4rem;position:relative;transition:border-color .25s}
+.content-card:hover{border-color:var(--border-mid)}
+
+/* Four-corner bracket effect */
+.content-card::before,.content-card::after{content:'';position:absolute;width:var(--brk);height:var(--brk);transition:opacity .25s}
+.content-card::before{top:-1px;left:-1px;border-top:2px solid var(--gold);border-left:2px solid var(--gold);opacity:.55}
+.content-card::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--gold);border-right:2px solid var(--gold);opacity:.22}
+.content-card:hover::before{opacity:1}
+.content-card:hover::after{opacity:.55}
+.card-brk-tr,.card-brk-bl{position:absolute;width:var(--brk);height:var(--brk);pointer-events:none;transition:opacity .25s}
+.card-brk-tr{top:-1px;right:-1px;border-top:2px solid var(--gold);border-right:2px solid var(--gold);opacity:.22}
+.card-brk-bl{bottom:-1px;left:-1px;border-bottom:2px solid var(--gold);border-left:2px solid var(--gold);opacity:.14}
+.content-card:hover .card-brk-tr{opacity:.55}
+.content-card:hover .card-brk-bl{opacity:.38}
+
+.card-title{font-family:'Rajdhani',sans-serif;font-size:.86rem;font-weight:700;letter-spacing:2.5px;
+  text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem}
+.card-title::before{content:'';width:3px;height:14px;background:var(--gold);display:inline-block;opacity:.65}
+.card-body{font-size:.87rem;color:var(--cream-dim);line-height:1.75}
+
+.info-list{list-style:none;display:flex;flex-direction:column;gap:.55rem}
+.info-list li{font-size:.85rem;color:var(--cream-dim);padding-left:1.4rem;position:relative;line-height:1.55}
+.info-list li::before{content:'▸';position:absolute;left:0;color:var(--gold);opacity:.75}
+.info-list li strong{color:var(--cream);font-weight:500}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.4rem}
+
+.notice{background:rgba(201,168,76,.05);border:1px solid var(--border);border-left:2px solid var(--gold);
+  padding:.9rem 1.2rem;margin-bottom:1.4rem;font-size:.82rem;color:var(--cream-dim);line-height:1.6;position:relative}
+.notice::before{content:'! NOTICE';position:absolute;top:-8px;left:10px;background:var(--bg2);
+  padding:0 6px;font-family:'Share Tech Mono',monospace;font-size:.46rem;letter-spacing:2px;color:var(--gold)}
+.notice strong{color:var(--gold-bright)}
+
+/* Rank rows */
+.rank-grid{display:flex;flex-direction:column;gap:.6rem}
+.rank-row{display:flex;align-items:flex-start;gap:1rem;background:rgba(4,10,5,.6);
+  border:1px solid var(--border);border-left:3px solid var(--gold-dim);padding:1rem 1.2rem;
+  transition:border-left-color .2s,background .2s}
+.rank-row:hover{background:rgba(201,168,76,.03);border-left-color:var(--gold-mid)}
+.rank-row.nco{border-left-color:var(--gold)}
+.rank-row.nco:hover{border-left-color:var(--gold-bright)}
+.rank-row.senior{border-left-color:var(--purple)}
+.rank-row.senior:hover{border-left-color:#9b6ff5}
+.rank-badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:1px;color:var(--bg);
+  background:var(--gold-dim);padding:.22rem .5rem;white-space:nowrap;flex-shrink:0;margin-top:.1rem;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)}
+.rank-row.nco .rank-badge{background:var(--gold);color:var(--bg)}
+.rank-row.senior .rank-badge{background:var(--purple);color:#e8d8ff}
+.rank-info h4{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.93rem;letter-spacing:1px;text-transform:uppercase;color:var(--cream)}
+.rank-info p{font-size:.78rem;color:var(--cream-dim);margin-top:.2rem;line-height:1.5}
+
+/* Squad cards */
+.squad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:1.2rem}
+.squad-card{background:rgba(4,10,5,.72);border:1px solid var(--border);padding:1.4rem;position:relative;transition:border-color .25s}
+.squad-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent);opacity:.55;transition:opacity .25s}
+.squad-card:hover{border-color:var(--border-mid)}
+.squad-card:hover::before{opacity:1}
+.squad-name{font-family:'Rajdhani',sans-serif;font-size:1.02rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cream);margin-bottom:.25rem}
+.squad-tag{font-family:'Share Tech Mono',monospace;font-size:.5rem;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:.8rem;opacity:.65}
+.squad-desc{font-size:.79rem;color:var(--cream-dim);line-height:1.55}
+
+/* Hierarchy */
+.hierarchy{display:flex;flex-direction:column}
+.hier-row{display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;border:1px solid var(--border);
+  margin-bottom:-1px;background:rgba(4,10,5,.5);transition:background .15s}
+.hier-row:hover{background:rgba(201,168,76,.03)}
+.hier-indent-1{padding-left:2.5rem}
+.hier-indent-2{padding-left:4rem}
+.hier-indent-3{padding-left:5.5rem}
+.hier-icon{font-size:.88rem;width:20px;text-align:center;flex-shrink:0}
+.hier-label{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.87rem;letter-spacing:1px;text-transform:uppercase;color:var(--cream);flex:1}
+.hier-sub{font-family:'Share Tech Mono',monospace;font-size:.53rem;letter-spacing:1px;color:var(--cream-faint)}
+
+/* Event grid */
+.event-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:1.2rem}
+.event-card{background:rgba(4,10,5,.72);border:1px solid var(--border);padding:1.3rem;text-align:center;position:relative;overflow:hidden;transition:border-color .25s}
+.event-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .25s}
+.event-card:hover{border-color:var(--border-mid)}
+.event-card:hover::after{opacity:.45}
+.event-icon{font-size:1.6rem;margin-bottom:.6rem}
+.event-name{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:1px;text-transform:uppercase;color:var(--cream);margin-bottom:.3rem}
+.event-schedule{font-family:'Share Tech Mono',monospace;font-size:.56rem;letter-spacing:1px;color:var(--gold);opacity:.78;margin-bottom:.5rem}
+.event-desc{font-size:.77rem;color:var(--cream-dim);line-height:1.45}
+
+/* Channel grid */
+.channel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:.6rem}
+.channel-item{display:flex;align-items:flex-start;gap:.6rem;padding:.68rem .9rem;background:rgba(4,10,5,.5);border:1px solid var(--border);transition:border-color .2s,background .2s}
+.channel-item:hover{background:rgba(201,168,76,.03);border-color:var(--border-mid)}
+.ch-hash{font-family:'Share Tech Mono',monospace;color:var(--gold);opacity:.45;font-size:.85rem;line-height:1;margin-top:1px}
+.ch-name{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.83rem;letter-spacing:.5px;color:var(--cream);line-height:1.2}
+.ch-desc{font-size:.69rem;color:var(--cream-faint);margin-top:.15rem}
+
+/* Rule blocks */
+.rule-block{display:flex;gap:1rem;padding:.78rem 1rem;background:rgba(4,10,5,.5);border:1px solid var(--border);margin-bottom:.5rem;align-items:flex-start;transition:border-color .2s}
+.rule-block:hover{border-color:var(--border-mid)}
+.rule-num{font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--gold);opacity:.65;flex-shrink:0;margin-top:.1rem;min-width:22px}
+.rule-text{font-size:.83rem;color:var(--cream-dim);line-height:1.5}
+.rule-text strong{color:var(--cream);font-weight:500}
+
+/* Buttons */
+.btn-primary{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.84rem;letter-spacing:2.5px;
+  text-transform:uppercase;padding:.74rem 1.8rem;background:var(--gold);color:var(--bg);border:none;
+  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  transition:background .2s,transform .15s;position:relative;overflow:hidden}
+.btn-primary::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transition:left .4s}
+.btn-primary:hover{background:var(--gold-bright);transform:translateY(-1px)}
+.btn-primary:hover::after{left:140%}
+.btn-outline{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.84rem;letter-spacing:2px;
+  text-transform:uppercase;padding:.74rem 1.8rem;background:transparent;color:var(--gold);
+  border:1px solid var(--gold);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:all .2s}
+.btn-outline:hover{background:rgba(201,168,76,.1);border-color:var(--gold-bright);color:var(--gold-bright)}
+.cta-row{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:2rem}
+
+/* Complete bar */
+.complete-bar{margin-top:2.5rem;padding:1.5rem;border:1px solid var(--border);background:rgba(7,18,8,.6);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;position:relative}
+.complete-bar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.35}
+.complete-bar::after{content:'STEP CLEARANCE';position:absolute;top:-7px;left:14px;background:var(--bg2);
+  padding:0 8px;font-family:'Share Tech Mono',monospace;font-size:.43rem;letter-spacing:2.5px;color:var(--gold);opacity:.55}
+.complete-left strong{display:block;font-family:'Rajdhani',sans-serif;font-size:.88rem;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--cream);margin-bottom:.2rem}
+.complete-left{font-size:.79rem;color:var(--cream-dim)}
+.btn-complete{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.81rem;letter-spacing:2px;
+  text-transform:uppercase;padding:.74rem 1.6rem;background:var(--complete);color:var(--bg);border:none;
+  cursor:pointer;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);transition:all .2s}
+.btn-complete:hover{background:#5ddb8f;box-shadow:0 0 16px var(--complete-glow)}
+.btn-complete.completed{background:rgba(76,204,130,.1);color:var(--complete);border:1px solid rgba(76,204,130,.3);cursor:default;box-shadow:none}
+
+/* Step nav */
+.step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.4rem;padding-top:1.4rem;border-top:1px solid var(--border)}
+.btn-nav{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;
+  padding:.55rem 1.1rem;background:transparent;border:1px solid var(--border);color:var(--cream-faint);cursor:pointer;transition:all .2s}
+.btn-nav:hover:not(:disabled){border-color:var(--border-mid);color:var(--cream-dim)}
+.btn-nav:disabled{opacity:.2;cursor:default}
+
+/* Presentation card */
+.presentation-card{background:rgba(7,18,8,.92);border:1px solid var(--border-mid);padding:2.5rem 2rem;text-align:center;margin-bottom:1.4rem;position:relative}
+.presentation-card::before,.presentation-card::after{content:'';position:absolute;width:14px;height:14px}
+.presentation-card::before{top:-1px;left:-1px;border-top:2px solid var(--gold);border-left:2px solid var(--gold)}
+.presentation-card::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--gold);border-right:2px solid var(--gold)}
+.presentation-card .icon{font-size:2.2rem;margin-bottom:.8rem}
+.presentation-card h4{font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem}
+.presentation-card p{font-size:.82rem;color:var(--cream-dim);line-height:1.65;max-width:480px;margin:0 auto 1.5rem}
+
+/* Welcome screen */
+.welcome-hero{text-align:center;padding:3rem 1rem 2rem}
+.welcome-icon{font-size:3.5rem;margin-bottom:1.2rem}
+.welcome-hero h2{font-family:'Rajdhani',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;
+  letter-spacing:4px;text-transform:uppercase;color:var(--cream);line-height:1.05;margin-bottom:1rem}
+.welcome-hero h2 span{color:var(--gold)}
+.welcome-hero p{color:var(--cream-dim);font-size:.9rem;line-height:1.7;max-width:520px;margin:0 auto 2rem}
+.welcome-links{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+
+/* Coordinate readout */
+#coord-readout{position:fixed;bottom:1.2rem;right:1.4rem;font-family:'Share Tech Mono',monospace;font-size:.48rem;letter-spacing:1.5px;color:var(--cream-faint);text-align:right;line-height:1.9;z-index:50;pointer-events:none;opacity:.45}
+
+/* Mobile */
+@media(max-width:768px){
+  :root{--sidebar-w:0px}
+  .sidebar{display:none}
+  .main{margin-left:0;padding:2rem 1.2rem 5rem}
+  #coord-readout{display:none}
+  .mobile-steps{position:fixed;bottom:0;left:0;right:0;background:rgba(4,10,5,.97);border-top:1px solid var(--border);padding:.8rem 1.2rem;display:flex;align-items:center;justify-content:space-between;z-index:150}
+  .two-col{grid-template-columns:1fr}
+  .squad-grid{grid-template-columns:1fr}
 }
-body::after{
-  content:'';position:fixed;inset:-30%;
-  background:radial-gradient(ellipse at 20% 10%,rgba(45,140,82,0.09) 0%,transparent 55%),radial-gradient(ellipse at 85% 20%,rgba(201,168,76,0.09) 0%,transparent 60%);
-  pointer-events:none;z-index:0;
-}
-
-a{color:inherit;text-decoration:none;}
-
-.app{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:272px 1fr;}
-
-/* ═══ SIDEBAR ═══ */
-.sidebar{
-  position:sticky;top:0;height:100vh;
-  padding:16px 12px;border-right:1px solid var(--border);
-  background:rgba(4,15,7,0.82);backdrop-filter:var(--blur);
-  display:flex;flex-direction:column;overflow-y:auto;
-}
-.sidebar::-webkit-scrollbar{width:4px;}
-.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-
-.brand{display:flex;align-items:center;gap:12px;padding:10px 8px 16px;border-bottom:1px solid rgba(201,168,76,0.10);margin-bottom:12px;}
-.brand-mark{
-  width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
-  border:1px solid var(--gold-d);background:rgba(201,168,76,0.07);
-  font-family:'Share Tech Mono',monospace;letter-spacing:2px;color:var(--gold);font-size:13px;
-  box-shadow:0 8px 24px rgba(0,0,0,0.35);
-}
-.brand-name{font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:17px;}
-.brand-sub{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-top:2px;}
-
-.nav-section-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin:14px 10px 6px;}
-
-.nav-btn{
-  width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;
-  border-radius:var(--r2);border:1px solid transparent;background:transparent;
-  color:var(--mid);cursor:pointer;transition:all .16s ease;text-align:left;
-  font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:13px;
-}
-.nav-btn .ico{width:28px;height:28px;border-radius:10px;display:grid;place-items:center;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.14);color:var(--gold);flex-shrink:0;font-size:13px;}
-.nav-btn:hover{color:var(--cream);background:rgba(201,168,76,0.05);border-color:var(--border);}
-.nav-btn.active{color:var(--gold);background:rgba(201,168,76,0.08);border-color:var(--border-b);box-shadow:0 8px 28px rgba(0,0,0,0.3);}
-
-/* onboarding progress in sidebar */
-.ob-progress{padding:10px 12px;margin:8px 0;background:rgba(201,168,76,0.05);border:1px solid var(--border);border-radius:var(--r2);}
-.ob-progress-label{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:6px;}
-.ob-bar{height:4px;background:rgba(201,168,76,0.12);border-radius:2px;overflow:hidden;}
-.ob-fill{height:100%;background:linear-gradient(to right,var(--gold-d),var(--gold));border-radius:2px;transition:width .4s ease;}
-
-.sidebar-foot{
-  margin-top:auto;padding:12px 8px 6px;border-top:1px solid rgba(201,168,76,0.10);
-  display:flex;gap:8px;flex-wrap:wrap;
-}
-.chip{
-  display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;
-  border:1px solid rgba(201,168,76,0.14);background:rgba(10,38,24,0.45);color:var(--mid);
-  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
-  transition:all .16s ease;cursor:pointer;
-}
-.chip:hover{color:var(--cream);border-color:var(--border-b);background:rgba(201,168,76,0.06);}
-
-/* ═══ MAIN ═══ */
-.main{min-height:100vh;display:flex;flex-direction:column;}
-
-.topbar{
-  position:sticky;top:0;z-index:50;padding:13px 18px;
-  border-bottom:1px solid var(--border);background:rgba(4,15,7,0.84);backdrop-filter:var(--blur);
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-}
-.top-left{display:flex;align-items:center;gap:12px;min-width:0;}
-.sidebar-toggle{display:none;width:40px;height:40px;border-radius:var(--r2);border:1px solid var(--border);background:rgba(10,38,24,0.55);color:var(--gold);cursor:pointer;transition:all .16s;}
-.sidebar-toggle:hover{border-color:var(--border-b);}
-.page-title .h{font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:3px;text-transform:uppercase;font-size:17px;white-space:nowrap;}
-.page-title .s{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);white-space:nowrap;}
-
-.mode-pill{
-  display:inline-flex;align-items:center;gap:10px;margin-left:10px;padding:7px 12px;
-  border-radius:999px;border:1px solid rgba(201,168,76,0.16);background:rgba(201,168,76,0.05);
-  color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;flex-shrink:0;
-}
-.sw{width:40px;height:20px;border-radius:999px;border:1px solid rgba(201,168,76,0.22);background:rgba(10,38,24,0.65);position:relative;cursor:pointer;flex-shrink:0;transition:all .16s;}
-.sw::after{content:'';position:absolute;top:50%;left:2px;width:15px;height:15px;transform:translateY(-50%);border-radius:50%;background:var(--gold);box-shadow:0 0 12px rgba(201,168,76,0.3);transition:all .16s;}
-.sw.on{border-color:var(--border-b);background:rgba(201,168,76,0.08);}
-.sw.on::after{left:21px;}
-
-.top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
-.search{position:relative;min-width:240px;max-width:380px;flex:1;}
-.search input{width:100%;padding:11px 14px 11px 36px;border-radius:var(--r2);border:1px solid rgba(201,168,76,0.16);background:rgba(10,38,24,0.55);color:var(--cream);outline:none;transition:all .16s;font-family:'Exo 2',sans-serif;font-size:13px;}
-.search input::placeholder{color:var(--dim);}
-.search input:focus{border-color:var(--border-b);box-shadow:0 0 0 3px rgba(201,168,76,0.08);}
-.search .mag{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:13px;pointer-events:none;}
-
-/* buttons */
-.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 14px;border-radius:var(--r2);border:1px solid var(--border);background:rgba(10,38,24,0.55);color:var(--mid);cursor:pointer;transition:all .16s;font-family:'Rajdhani',sans-serif;font-weight:800;letter-spacing:2px;text-transform:uppercase;font-size:11px;white-space:nowrap;text-decoration:none;}
-.btn:hover{color:var(--cream);border-color:var(--border-b);transform:translateY(-1px);}
-.btn-gold{background:var(--gold);color:var(--bg);border-color:transparent;}
-.btn-gold:hover{background:var(--gold-l);box-shadow:0 8px 28px rgba(201,168,76,0.22);}
-.btn-outline{background:transparent;color:var(--gold);border-color:rgba(201,168,76,0.28);}
-.btn-outline:hover{background:rgba(201,168,76,0.08);}
-.btn.sm{padding:9px 12px;border-radius:10px;font-size:10px;}
-.btn-complete-sm{background:var(--complete);color:var(--bg);border-color:transparent;}
-.btn-complete-sm:hover{background:#5dcc8f;}
-.btn-complete-sm.done{background:rgba(76,175,122,0.12);color:var(--complete);border:1px solid var(--complete);cursor:default;}
-
-/* announce */
-.announce{margin:14px 18px 0;border-radius:var(--r);border:1px solid rgba(201,168,76,0.14);background:linear-gradient(135deg,rgba(201,168,76,0.08) 0%,rgba(10,38,24,0.6) 60%);padding:13px 16px;display:flex;gap:12px;align-items:flex-start;}
-.announce .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);margin-top:4px;box-shadow:0 0 12px rgba(201,168,76,0.4);animation:pulse 2.2s infinite;flex-shrink:0;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.announce .kicker{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
-.announce .msg{color:var(--mid);font-size:13px;line-height:1.5;}
-
-/* content area */
-.content{padding:18px;display:flex;flex-direction:column;gap:18px;flex:1;}
-.view{display:none;animation:fadeUp .25s ease;}
-.view.active{display:block;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* view head */
-.vhead{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:4px 2px 2px;}
-.vhead .vtitle .eye{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
-.vhead .vtitle h2{font-family:'Rajdhani',sans-serif;font-size:clamp(28px,4vw,38px);font-weight:800;letter-spacing:3px;text-transform:uppercase;}
-.vhead .vtitle p{color:var(--mid);max-width:700px;line-height:1.6;font-size:13px;margin-top:4px;}
-.vhead .vactions{display:flex;gap:10px;flex-wrap:wrap;}
-
-/* grid */
-.grid{display:grid;gap:16px;}
-.g12{grid-template-columns:repeat(12,minmax(0,1fr));}
-.c12{grid-column:span 12;}.c8{grid-column:span 8;}.c7{grid-column:span 7;}.c6{grid-column:span 6;}.c5{grid-column:span 5;}.c4{grid-column:span 4;}.c3{grid-column:span 3;}
-
-/* card */
-.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);padding:18px;box-shadow:0 10px 36px rgba(0,0,0,0.2);position:relative;overflow:hidden;transition:border-color .16s;}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,var(--gold-d),transparent);opacity:.5;}
-.card:hover{border-color:var(--border-b);}
-.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
-.card-h .name{font-family:'Rajdhani',sans-serif;font-weight:800;letter-spacing:2px;text-transform:uppercase;font-size:15px;display:flex;align-items:center;gap:10px;}
-.badge{display:inline-flex;padding:5px 10px;border-radius:999px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;border:1px solid var(--border);background:rgba(201,168,76,0.05);color:var(--gold);white-space:nowrap;}
-
-/* KPI */
-.kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
-.kpi{border-radius:14px;border:1px solid rgba(201,168,76,0.12);background:rgba(10,38,24,0.55);padding:14px;}
-.kpi .n{font-family:'Rajdhani',sans-serif;font-weight:900;font-size:28px;color:var(--gold);line-height:1.1;}
-.kpi .l{margin-top:6px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);}
-
-/* list items */
-.list{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
-.item{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,0.05);background:rgba(10,38,24,0.5);transition:border-color .16s;}
-.item:hover{border-color:rgba(201,168,76,0.2);}
-.item .idot{width:9px;height:9px;border-radius:50%;background:rgba(201,168,76,0.5);margin-top:5px;flex-shrink:0;}
-.item .it{font-weight:700;letter-spacing:1px;font-size:14px;}
-.item .id{margin-top:4px;color:var(--mid);font-size:13px;line-height:1.55;}
-
-/* checklist */
-.checklist{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
-.checklist label{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:14px;border:1px solid rgba(255,255,255,0.05);background:rgba(10,38,24,0.5);cursor:pointer;transition:all .15s;}
-.checklist label:hover{border-color:rgba(201,168,76,0.2);}
-.checklist input[type=checkbox]{margin-top:3px;accent-color:var(--gold);}
-.checklist .cx-h{font-weight:700;letter-spacing:.5px;font-size:14px;}
-.checklist .cx-p{color:var(--mid);font-size:12px;line-height:1.5;margin-top:2px;}
-
-/* onboarding steps */
-.ob-steps{display:flex;flex-direction:column;gap:12px;margin-top:10px;}
-.ob-step{border-radius:14px;border:1px solid rgba(255,255,255,0.05);background:rgba(10,38,24,0.5);overflow:hidden;transition:border-color .16s;}
-.ob-step:hover{border-color:var(--border);}
-.ob-step.done{border-color:rgba(76,175,122,0.25);}
-.ob-step-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;}
-.ob-num{width:32px;height:32px;border-radius:50%;border:1px solid var(--border-b);display:grid;place-items:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--mid);flex-shrink:0;transition:all .3s;background:rgba(10,38,24,0.8);}
-.ob-step.active .ob-num{background:var(--gold);color:var(--bg);border-color:var(--gold);}
-.ob-step.done .ob-num{background:var(--complete);color:var(--bg);border-color:var(--complete);}
-.ob-step-title{font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:14px;}
-.ob-step.active .ob-step-title{color:var(--gold);}
-.ob-step.done .ob-step-title{color:var(--complete);}
-.ob-step-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);margin-top:2px;}
-.ob-step-arrow{margin-left:auto;color:var(--dim);font-size:12px;transition:transform .2s;}
-.ob-step.open .ob-step-arrow{transform:rotate(180deg);}
-.ob-step-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border);}
-.ob-step.open .ob-step-body{display:block;padding-top:14px;}
-.ob-step-body p{color:var(--mid);font-size:13px;line-height:1.65;margin-bottom:12px;}
-.ob-step-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
-
-/* accordion */
-.accordion{margin-top:10px;display:flex;flex-direction:column;gap:8px;}
-.acc{border-radius:14px;border:1px solid rgba(255,255,255,0.05);background:rgba(10,38,24,0.5);overflow:hidden;}
-.acc button{width:100%;padding:13px 16px;background:transparent;border:none;color:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:'Rajdhani',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:13px;}
-.acc button .acc-mini{font-family:'Share Tech Mono',monospace;font-weight:400;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
-.acc-body{display:none;padding:0 16px 14px;color:var(--mid);font-size:13px;line-height:1.65;}
-.acc.open .acc-body{display:block;}
-.acc-body ul{margin:10px 0 0 18px;}
-.acc-body li{margin:6px 0;}
-.acc-body strong{color:var(--cream);}
-
-/* mini cards grid */
-.cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:10px;}
-.mc{border-radius:14px;border:1px solid rgba(201,168,76,0.12);background:rgba(10,38,24,0.55);padding:14px;transition:all .16s;display:flex;flex-direction:column;gap:10px;}
-.mc:hover{border-color:var(--border-b);transform:translateY(-2px);}
-.mc .mc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-.mc .mc-title{font-family:'Rajdhani',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:14px;}
-.mc .mc-sub{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--dim);margin-top:3px;}
-.pill{display:inline-flex;padding:4px 10px;border-radius:999px;border:1px solid rgba(201,168,76,0.16);background:rgba(201,168,76,0.05);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
-.pill.officer{background:rgba(201,168,76,0.18);border-color:var(--gold);}
-.pill.complete{background:rgba(76,175,122,0.12);border-color:var(--complete);color:var(--complete);}
-.pill.required{background:rgba(220,80,80,0.12);border-color:rgba(220,80,80,0.4);color:#e87878;}
-.mc .mc-desc{color:var(--mid);font-size:12px;line-height:1.55;flex:1;}
-.mc .mc-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;}
-
-/* rank rows */
-.rank-grid{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
-.rank-row{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;border-radius:14px;border:1px solid rgba(255,255,255,0.05);background:rgba(10,38,24,0.5);transition:border-color .16s;}
-.rank-row:hover{border-color:var(--border);}
-.rank-badge{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--bg);background:var(--gold-d);padding:3px 7px;white-space:nowrap;flex-shrink:0;margin-top:2px;border-radius:4px;}
-.rank-row.nco .rank-badge{background:var(--gold);}
-.rank-row.senior .rank-badge{background:#8a2be2;}
-.rank-info h4{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;letter-spacing:1px;color:var(--cream);}
-.rank-info p{font-size:12px;color:var(--mid);margin-top:3px;line-height:1.5;}
-.rank-req{margin-top:8px;padding:8px 10px;background:rgba(10,38,24,0.8);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--dim);line-height:1.5;}
-.rank-req a{color:var(--gold);}
-
-/* hierarchy */
-.hier{display:flex;flex-direction:column;gap:0;margin-top:10px;}
-.hier-row{display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(10,38,24,0.5);border:1px solid rgba(255,255,255,0.05);margin-bottom:-1px;transition:background .15s;}
-.hier-row:hover{background:rgba(10,38,24,0.75);}
-.hi1{padding-left:2.5rem;}.hi2{padding-left:4rem;}.hi3{padding-left:5.5rem;}.hi4{padding-left:7rem;}
-.hier-ico{font-size:14px;width:22px;text-align:center;flex-shrink:0;}
-.hier-label{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
-.hier-sub{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--dim);}
-
-/* squad cards with sub-units */
-.squad-card{border-radius:14px;border:1px solid var(--border);background:rgba(10,38,24,0.55);padding:16px;transition:all .16s;}
-.squad-card:hover{border-color:var(--border-b);transform:translateY(-2px);}
-.squad-card.coming{opacity:.5;}
-.sq-name{font-family:'Rajdhani',sans-serif;font-weight:900;font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--cream);}
-.sq-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);margin:4px 0 8px;}
-.sq-desc{font-size:12px;color:var(--mid);line-height:1.5;margin-bottom:12px;}
-.sq-subs{background:rgba(10,38,24,0.8);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--dim);}
-.sq-subs .sq-sub-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);margin-bottom:5px;}
-.sq-subs ul{list-style:none;display:flex;flex-direction:column;gap:3px;}
-.sq-subs li::before{content:'▸ ';color:var(--gold-d);}
-
-/* event cards */
-.event-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:10px;}
-.ev-card{border-radius:14px;border:1px solid var(--border);background:rgba(10,38,24,0.55);padding:16px;text-align:center;}
-.ev-ico{font-size:28px;margin-bottom:8px;}
-.ev-name{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--cream);}
-.ev-sched{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--gold);margin:4px 0 6px;}
-.ev-desc{font-size:11px;color:var(--mid);line-height:1.45;}
-
-/* channel items */
-.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-top:10px;}
-.ch-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.05);background:rgba(10,38,24,0.5);}
-.ch-hash{font-family:'Share Tech Mono',monospace;color:var(--gold);opacity:.55;font-size:13px;}
-.ch-name{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:13px;color:var(--cream);}
-.ch-desc{font-size:11px;color:var(--dim);margin-top:1px;}
-.ch-badge{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 6px;border:1px solid var(--gold-d);color:var(--gold-d);border-radius:4px;text-transform:uppercase;}
-
-/* notice */
-.notice{background:rgba(201,168,76,0.06);border:1px solid var(--border);border-left:3px solid var(--gold);padding:11px 14px;border-radius:0 8px 8px 0;margin-bottom:14px;font-size:13px;color:var(--mid);line-height:1.6;}
-.notice strong{color:var(--gold);}
-
-/* table */
-table{width:100%;border-collapse:collapse;margin-top:10px;}
-th{text-align:left;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);padding:11px 12px;border-bottom:1px solid rgba(201,168,76,0.28);background:rgba(201,168,76,0.05);}
-td{padding:11px 12px;border-bottom:1px solid rgba(201,168,76,0.12);color:var(--mid);font-size:12px;}
-tr:hover td{background:rgba(10,38,24,0.5);color:var(--cream);}
-
-/* rule items */
-.rule-item{display:flex;gap:12px;padding:10px 12px;background:rgba(10,38,24,0.5);border:1px solid rgba(255,255,255,0.05);border-radius:12px;margin-bottom:6px;}
-.rule-num{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold);flex-shrink:0;min-width:24px;margin-top:2px;}
-.rule-text{font-size:12px;color:var(--mid);line-height:1.5;}
-.rule-text strong{color:var(--cream);}
-
-/* footer */
-.footer{padding:16px 18px;color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;border-top:1px solid rgba(201,168,76,0.12);}
-
-/* responsive */
-@media(max-width:960px){
-  .app{grid-template-columns:1fr;}
-  .sidebar{position:fixed;top:0;left:0;width:272px;transform:translateX(-110%);transition:transform .18s ease;z-index:80;box-shadow:var(--shadow);}
-  .sidebar.open{transform:translateX(0);}
-  .sidebar-toggle{display:inline-grid;place-items:center;}
-  .c8,.c7,.c6,.c5,.c4,.c3{grid-column:span 12;}
-  .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr));}
-  .top-right .search{min-width:160px;}
-  .mode-pill{display:none;}
-}
+@media(min-width:769px){.mobile-steps{display:none}}
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- ═══════════════ SIDEBAR ═══════════════ -->
-<aside class="sidebar" id="sidebar">
-  <div class="brand">
-    <div class="brand-mark">RG</div>
-    <div>
-      <div class="brand-name">The Regiment</div>
-      <div class="brand-sub">Command Hub</div>
-    </div>
+<!-- NAV -->
+<div class="vignette"></div>
+<div id="coord-readout"><div id="coord-lat">LAT: 35°48'22"N</div><div id="coord-lon">LON: 14°30'41"E</div><div id="coord-step">PHASE: INIT</div></div>
+<nav>
+  <a href="https://theregimenthq.com" class="nav-brand">The Regiment</a>
+  <div class="nav-center"><div class="nav-status-dot"></div><span>SYSTEM ONLINE</span></div>
+  <div class="nav-right">
+    <a href="https://theregimenthq.com">Hub</a>
+    <a href="patreon.html">Patreon</a>
+    <a href="https://discord.gg/GpSUC73G9c" target="_blank">Discord</a>
   </div>
+</nav>
 
-  <div style="display:flex;flex-direction:column;gap:4px;padding:0 4px;">
-    <div class="nav-section-label">// Navigation</div>
-    <button class="nav-btn active" data-view="overview"><span class="ico">⌁</span>Overview</button>
-    <button class="nav-btn" data-view="onboarding"><span class="ico">➤</span>Onboarding</button>
-    <button class="nav-btn" data-view="ranks"><span class="ico">⟡</span>Ranking System</button>
-    <button class="nav-btn" data-view="rules"><span class="ico">✦</span>Rules & Conduct</button>
+<div class="layout">
 
-    <div id="ob-sidebar-progress" class="ob-progress" style="display:none;">
-      <div class="ob-progress-label">
-        <span>Onboarding Progress</span>
-        <span id="ob-count">0/8</span>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-designation">// OPS SEQUENCE</div>
+      <div class="sidebar-title">Recruit Onboarding</div>
+      <div class="seg-progress-label">
+        <span class="seg-label-txt">Mission Progress</span>
+        <span class="seg-pct" id="seg-pct-txt">0%</span>
       </div>
-      <div class="ob-bar"><div class="ob-fill" id="ob-fill" style="width:0%"></div></div>
-    </div>
-
-    <div class="nav-section-label">// Operations</div>
-    <button class="nav-btn" data-view="squads"><span class="ico">⚑</span>Squads</button>
-    <button class="nav-btn" data-view="events"><span class="ico">⟁</span>Events & Discord</button>
-    <button class="nav-btn" data-view="training"><span class="ico">⛨</span>Trainings</button>
-    <button class="nav-btn" data-view="forms"><span class="ico">📋</span>Forms</button>
-
-    <div class="nav-section-label">// Support</div>
-    <button class="nav-btn" data-view="patreon"><span class="ico">★</span>Patreon</button>
-  </div>
-
-  <div class="sidebar-foot">
-    <a class="chip" href="https://theregimenthq.com" target="_blank">RegimentHQ ↗</a>
-    <a class="chip" href="https://discord.gg/GpSUC73G9c" target="_blank">Discord ↗</a>
-    <a class="chip" href="patreon.html">Patreon ↗</a>
-  </div>
-</aside>
-
-<!-- ═══════════════ MAIN ═══════════════ -->
-<main class="main">
-  <header class="topbar">
-    <div class="top-left">
-      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
-      <div class="page-title">
-        <div class="h">Command Hub</div>
-        <div class="s">Onboarding · Ranks · Squads · Ops · Resources</div>
+      <div class="seg-blocks" id="seg-blocks">
+        <div class="seg-block" data-idx="0"></div>
+        <div class="seg-block" data-idx="1"></div>
+        <div class="seg-block" data-idx="2"></div>
+        <div class="seg-block" data-idx="3"></div>
+        <div class="seg-block" data-idx="4"></div>
+        <div class="seg-block" data-idx="5"></div>
+        <div class="seg-block" data-idx="6"></div>
+        <div class="seg-block" data-idx="7"></div>
       </div>
-      <div class="mode-pill">
-        <span id="modeText">New Member</span>
-        <span class="sw" id="modeSw" role="switch" aria-checked="false" tabindex="0"></span>
+      <div class="sys-status"><div class="sys-dot"></div><span id="sys-status-txt">AWAITING INPUT</span></div>
+    </div>
+
+    <div class="step-list" id="step-list">
+      <!-- injected by JS -->
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="reset-btn" onclick="resetProgress()">↺ Reset Progress</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- STEP 1: Registration Form -->
+    <div class="step-panel active" id="panel-0">
+      <div class="panel-header">
+        <div class="panel-step-tag">// Step 01 — Action Required</div>
+        <div class="panel-title">Submit Your <span>Registration</span></div>
+        <p class="panel-desc">Your first step into The Regiment starts here. Fill out the New Member Registration Form so Command can add you to the Master Roster and begin your onboarding process.</p>
       </div>
-    </div>
-    <div class="top-right">
-      <div class="search"><span class="mag">⌕</span><input id="search" type="search" placeholder="Search ranks, rules, squads, forms…"/></div>
-      <a class="btn sm btn-outline" href="https://discord.gg/GpSUC73G9c" target="_blank">Discord ↗</a>
-      <a class="btn sm btn-gold" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Register ↗</a>
-    </div>
-  </header>
 
-  <div class="announce">
-    <span class="dot"></span>
-    <div>
-      <div class="kicker">// Live</div>
-      <div class="msg" id="announceMsg">Battle Day runs every Friday. Monthly Onboarding is held on the 5th Sunday of each month — check <b>#regiment-announcements</b> for details.</div>
-    </div>
-  </div>
+      <div class="notice"><strong>Important:</strong> You must complete this form before progressing through onboarding. Once submitted, your profile will be created in our system and your status will be set to Pending Onboarding.</div>
 
-  <div class="content">
-
-    <!-- ═══ OVERVIEW ═══ -->
-    <section class="view active" id="view-overview">
-      <div class="vhead">
-        <div class="vtitle">
-          <div class="eye">// Command Overview</div>
-          <h2>Dashboard</h2>
-          <p>Welcome to The Regiment's Command Hub. Use the sidebar to navigate onboarding, ranks, squads, events, and resources.</p>
-        </div>
-        <div class="vactions">
-          <button class="btn btn-outline" onclick="goView('onboarding')">Start Onboarding</button>
-          <a class="btn btn-gold" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Register ↗</a>
+      <div class="content-card">
+        <div class="card-title">📋 New Member Registration Form</div>
+        <div class="card-body">
+          <p style="margin-bottom:1.2rem;">This form collects your basic information including your Discord username, gamertag, platform, and preferred squad. After submission:</p>
+          <ul class="info-list">
+            <li>Your name is added to the <strong>Master Command Sheet</strong></li>
+            <li>Your status is set to <strong>⏳ Pending Onboarding</strong></li>
+            <li>Leadership will be notified of your registration</li>
+            <li>You will receive Discord role assignment instructions</li>
+          </ul>
         </div>
       </div>
 
-      <div class="grid g12">
-        <div class="card c12">
-          <div class="card-h"><div class="name">Unit Snapshot</div><span class="badge">Live Stats</span></div>
-          <div class="kpi-row">
-            <div class="kpi"><div class="n">610+</div><div class="l">Discord Members</div></div>
-            <div class="kpi"><div class="n">4</div><div class="l">Active Squads</div></div>
-            <div class="kpi"><div class="n">ARCL</div><div class="l">Competitive League</div></div>
-            <div class="kpi"><div class="n">E-1→E-9</div><div class="l">Rank Ladder</div></div>
-          </div>
+      <div class="cta-row">
+        <a href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank" class="btn-primary">📋 Open Registration Form</a>
+        <a href="https://discord.gg/GpSUC73G9c" target="_blank" class="btn-outline">Join Discord Server</a>
+      </div>
+
+      <div class="complete-bar">
+        <div class="complete-left">
+          <strong>Mark as Complete</strong>
+          Check this off once you've submitted the registration form.
+        </div>
+        <button class="btn-complete" id="complete-0" onclick="markComplete(0)">✓ Mark Complete</button>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" disabled>← Previous</button>
+        <button class="btn-nav" onclick="goToStep(1)">Next: Visit the Website →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Visit the Website -->
+    <div class="step-panel" id="panel-1">
+      <div class="panel-header">
+        <div class="panel-step-tag">// Step 02 — Explore</div>
+        <div class="panel-title">Visit the Regiment <span>Website</span></div>
+        <p class="panel-desc">The Regiment Hub is your central command center. Familiarize yourself with all available resources, dashboards, and tools before proceeding with onboarding.</p>
+      </div>
+
+      <div class="content-card">
+        <div class="card-title">🌐 What's on the Website</div>
+        <div class="card-body">
+          <ul class="info-list">
+            <li><strong>Main Hub</strong> — <a href="https://theregimenthq.com" target="_blank" style="color:var(--gold);">theregimenthq.com</a> — Member dashboard with training forms, events, and community info</li>
+            <li><strong>Leadership Portal</strong> — Squad rosters, training tracker, org chart — for squad and platoon leaders</li>
+            <li><strong>ARCL Hub</strong> — Competitive PVP division hub, schedule, roster, and match VODs</li>
+            <li><strong>Patreon Hub</strong> — Membership tiers, benefits, and exclusive member access</li>
+            <li><strong>Onboarding (this page)</strong> — Step-by-step guide from recruit to active member</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cta-row">
+        <a href="https://theregimenthq.com" target="_blank" class="btn-primary">🌐 Visit the Main Hub</a>
+        <a href="https://discord.gg/GpSUC73G9c" target="_blank" class="btn-outline">Join the Discord</a>
+      </div>
+
+      <div class="complete-bar">
+        <div class="complete-left">
+          <strong>Mark as Complete</strong>
+          Check this off after exploring the Regiment website.
+        </div>
+        <button class="btn-complete" id="complete-1" onclick="markComplete(1)">✓ Mark Complete</button>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goToStep(0)">← Previous</button>
+        <button class="btn-nav" onclick="goToStep(2)">Next: Code of Conduct →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Code of Conduct -->
+    <div class="step-panel" id="panel-2">
+      <div class="panel-header">
+        <div class="panel-step-tag">// Step 03 — Required Reading</div>
+        <div class="panel-title">Code of <span>Conduct</span></div>
+        <p class="panel-desc">All Regiment members — squad and community alike — are expected to uphold these standards at all times, both in-game and on the Discord server. Read carefully.</p>
+      </div>
+
+      <div class="two-col">
+        <div class="content-card" style="margin-bottom:0">
+          <div class="card-title">🎮 In-Game Rules</div>
+          <div class="rule-block"><div class="rule-num">01</div><div class="rule-text"><strong>Respectful Communication</strong> — Treat every member with respect at all times.</div></div>
+          <div class="rule-block"><div class="rule-num">02</div><div class="rule-text"><strong>Positive Attitude</strong> — Maintain a constructive mindset in all situations.</div></div>
+          <div class="rule-block"><div class="rule-num">03</div><div class="rule-text"><strong>Teamwork First</strong> — Team success takes priority over individual performance.</div></div>
+          <div class="rule-block"><div class="rule-num">04</div><div class="rule-text"><strong>No Team Killing</strong> — Non-accidental team killing is strictly prohibited.</div></div>
+          <div class="rule-block"><div class="rule-num">05</div><div class="rule-text"><strong>No Griefing</strong> — Disruptive or sabotaging behavior will not be tolerated.</div></div>
+          <div class="rule-block"><div class="rule-num">06</div><div class="rule-text"><strong>Constructive Criticism</strong> — Feedback must be delivered respectfully.</div></div>
+          <div class="rule-block"><div class="rule-num">07</div><div class="rule-text"><strong>Communicate Clearly</strong> — Use proper radio discipline and clear callouts.</div></div>
+          <div class="rule-block"><div class="rule-num">08</div><div class="rule-text"><strong>Fair Play</strong> — Compete and operate with integrity at all times.</div></div>
+          <div class="rule-block"><div class="rule-num">09</div><div class="rule-text"><strong>Respectful Mic Usage</strong> — No excessive noise, music, or interruptions.</div></div>
+          <div class="rule-block"><div class="rule-num">10</div><div class="rule-text"><strong>Enjoy the Game</strong> — This is a community. Have fun.</div></div>
         </div>
 
-        <!-- New Member Widget -->
-        <div class="card c7" id="w-new">
-          <div class="card-h"><div class="name">New Recruit Checklist</div><span class="badge">Do these in order</span></div>
-          <div class="checklist" id="overviewChecklist">
-            <label><input type="checkbox" data-ck="reg"/><span><div class="cx-h">Submit Registration Form</div><div class="cx-p">Fill out the Recruit Survey — this is your entry into the system.</div></span></label>
-            <label><input type="checkbox" data-ck="discord"/><span><div class="cx-h">Join the Discord Server</div><div class="cx-p">Accept invite, set nickname to your gamertag, read rules.</div></span></label>
-            <label><input type="checkbox" data-ck="coc"/><span><div class="cx-h">Read Code of Conduct</div><div class="cx-p">Required before any squad assignment or mission participation.</div></span></label>
-            <label><input type="checkbox" data-ck="ranks"/><span><div class="cx-h">Understand the SMART Rank System</div><div class="cx-p">Learn how promotion works — activity, education, and contribution.</div></span></label>
-            <label><input type="checkbox" data-ck="squad"/><span><div class="cx-h">Get Squad Assignment</div><div class="cx-p">Request assignment via form — leadership will route you to the right unit.</div></span></label>
-            <label><input type="checkbox" data-ck="presentation"/><span><div class="cx-h">Review Onboarding Presentation</div><div class="cx-p">Watch the Regiment intro deck before your first live session.</div></span></label>
+        <div class="content-card" style="margin-bottom:0">
+          <div class="card-title">💬 Discord Server Rules</div>
+          <div class="rule-block"><div class="rule-num">01</div><div class="rule-text"><strong>Respectful Communication</strong> — The same standard applies on Discord as in-game.</div></div>
+          <div class="rule-block"><div class="rule-num">02</div><div class="rule-text"><strong>Positive Attitude</strong> — Keep conversations constructive and uplifting.</div></div>
+          <div class="rule-block"><div class="rule-num">03</div><div class="rule-text"><strong>No Slurs</strong> — Zero tolerance for slurs or derogatory language of any kind.</div></div>
+          <div class="rule-block"><div class="rule-num">04</div><div class="rule-text"><strong>No Racist Remarks</strong> — Racist or discriminatory content results in immediate removal.</div></div>
+          <div class="rule-block"><div class="rule-num">05</div><div class="rule-text"><strong>No Griefing</strong> — This includes trolling, spamming, and disruptive behavior.</div></div>
+          <div class="rule-block"><div class="rule-num">06</div><div class="rule-text"><strong>Open to Feedback</strong> — Accept and give constructive criticism professionally.</div></div>
+          <div class="rule-block"><div class="rule-num">07</div><div class="rule-text"><strong>Communicate Effectively</strong> — Be clear, concise, and on-topic in all channels.</div></div>
+          <div class="rule-block"><div class="rule-num">08</div><div class="rule-text"><strong>Promote Unity</strong> — Support fellow members and contribute to community growth.</div></div>
+          <div class="rule-block"><div class="rule-num">09</div><div class="rule-text"><strong>Respect Squad Mates</strong> — Honor the chain of command and your teammates.</div></div>
+          <div class="rule-block"><div class="rule-num">10</div><div class="rule-text"><strong>Respect Leaders</strong> — Follow the direction of squad leaders, platoon leaders, and command.</div></div>
+        </div>
+      </div>
+
+      <div class="complete-bar">
+        <div class="complete-left">
+          <strong>Mark as Complete</strong>
+          Confirm you have read and understood the Code of Conduct.
+        </div>
+        <button class="btn-complete" id="complete-2" onclick="markComplete(2)">✓ I've Read & Understood</button>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goToStep(1)">← Previous</button>
+        <button class="btn-nav" onclick="goToStep(3)">Next: Ranking System →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Ranking System -->
+    <div class="step-panel" id="panel-3">
+      <div class="panel-header">
+        <div class="panel-step-tag">// Step 04 — Know Your Path</div>
+        <div class="panel-title">The <span>SMART</span> Rank System</div>
+        <p class="panel-desc">The Regiment uses the SMART promotion model — Specific, Measurable, Achievable, Relevant, Time-bound. Rank is no longer given for time served. It is earned by completing specific, tracked tasks across three categories.</p>
+      </div>
+
+      <div class="notice"><strong>Note:</strong> Ranks apply to Squad Members only. To request a promotion review, type <strong>!rankreview</strong> in any Discord channel with MEE6 — this notifies Squad Leadership in #rank-promotions.</div>
+
+      <div class="content-card">
+        <div class="card-title">📊 The 3 Promotion Categories</div>
+        <div class="two-col" style="margin-bottom:0;">
+          <div style="background:var(--bg2);border:1px solid var(--border);padding:1.2rem;">
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:0.5rem;">🎯 Activity</div>
+            <p style="font-size:0.83rem;color:var(--cream-dim);line-height:1.5;">Attendance in missions and trainings, tracked monthly. Consistency is the baseline.</p>
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-            <button class="btn btn-outline sm" onclick="goView('onboarding')">Full Onboarding →</button>
-            <button class="btn btn-gold sm" onclick="goView('training')">Trainings →</button>
+          <div style="background:var(--bg2);border:1px solid var(--border);padding:1.2rem;">
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:0.5rem;">📚 Education</div>
+            <p style="font-size:0.83rem;color:var(--cream-dim);line-height:1.5;">Completing specific courses — Leadership I, Logistics, Game Master Module, and more.</p>
           </div>
         </div>
-
-        <div class="card c5">
-          <div class="card-h"><div class="name">Quick Links</div><span class="badge">One-click</span></div>
-          <div class="list">
-            <div class="item"><div class="idot"></div><div>
-              <div class="it">Recruit Survey</div>
-              <div class="id">Register and join the Regiment roster.</div>
-              <div style="margin-top:8px;"><a class="btn sm btn-gold" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Open Form ↗</a></div>
-            </div></div>
-            <div class="item"><div class="idot"></div><div>
-              <div class="it">Discord Server</div>
-              <div class="id">Ops, announcements, squad channels, and community.</div>
-              <div style="margin-top:8px;"><a class="btn sm btn-outline" href="https://discord.gg/GpSUC73G9c" target="_blank">Join ↗</a></div>
-            </div></div>
-            <div class="item"><div class="idot"></div><div>
-              <div class="it">Onboarding Presentation</div>
-              <div class="id">Full Regiment intro deck — mission, squads, events, values.</div>
-              <div style="margin-top:8px;"><a class="btn sm btn-outline" href="https://www.canva.com/d/fkjxulyhldhePB6" target="_blank">View Deck ↗</a></div>
-            </div></div>
-            <div class="item"><div class="idot"></div><div>
-              <div class="it">Patreon Membership</div>
-              <div class="id">Sergeant ($4.99) and Officer ($9.99) tiers available.</div>
-              <div style="margin-top:8px;"><a class="btn sm" href="patreon.html">View Tiers →</a></div>
-            </div></div>
-          </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:1.2rem;margin-top:1rem;">
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:0.5rem;">🤝 Contribution</div>
+          <p style="font-size:0.83rem;color:var(--cream-dim);line-height:1.5;">Tangible impact — recruiting new members, passing peer evaluations, and leading events.</p>
         </div>
+      </div>
 
-        <!-- Member Widget -->
-        <div class="card c12" id="w-member" style="display:none;">
-          <div class="card-h"><div class="name">Member Operations Snapshot</div><span class="badge">Active Operators</span></div>
-          <div class="grid g12" style="margin-top:4px;">
-            <div class="c6"><div class="item"><div class="idot"></div><div>
-              <div class="it">Next Op — Battle Day</div>
-              <div class="id">Every Friday. Server codes in #server-codes-only. Show up early for briefing.</div>
-              <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-                <a class="btn sm btn-gold" href="https://discord.gg/GpSUC73G9c" target="_blank">Go to Discord ↗</a>
-                <button class="btn sm btn-outline" onclick="goView('events')">View Schedule</button>
+      <div class="content-card">
+        <div class="card-title">⚔️ Junior Enlisted (E-1 through E-4)</div>
+        <div class="rank-grid">
+
+          <div class="rank-row">
+            <div class="rank-badge">E-1</div>
+            <div class="rank-info">
+              <h4>Private</h4>
+              <p>Entry rank upon squad assignment. Attend 1 mission or training/month. Follow rules, learn movement, comms, and team roles.</p>
+              <div style="margin-top:0.6rem;padding:0.6rem;background:var(--bg);border:1px solid var(--border);font-size:0.75rem;color:var(--cream-dim);">
+                <span style="color:var(--gold);">→ To reach PFC:</span> 3 weeks active · 2 squad trainings + 2 missions · 60%+ attendance ·
+                <a href="https://app.smartsheet.com/b/form/fff83e1a5e3b404d85e0119c4c76bd53" target="_blank" style="color:var(--gold);">SL Eval Form</a> +
+                <a href="https://app.smartsheet.com/b/form/0bb0656f1a51477093facdbc616b737a" target="_blank" style="color:var(--gold);">Regiment Feedback Form</a>
               </div>
-            </div></div></div>
-            <div class="c6"><div class="item"><div class="idot"></div><div>
-              <div class="it">Rank Progression — SMART System</div>
-              <div class="id">Activity + Education + Contribution. Type !rankreview in Discord to request a review.</div>
-              <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn sm btn-outline" onclick="goView('ranks')">Open Ranks</button>
-                <a class="btn sm" href="https://app.smartsheet.com/b/form/fff83e1a5e3b404d85e0119c4c76bd53" target="_blank">SL Eval Form ↗</a>
-              </div>
-            </div></div></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ ONBOARDING ═══ -->
-    <section class="view" id="view-onboarding">
-      <div class="vhead">
-        <div class="vtitle">
-          <div class="eye">// Induction Protocol</div>
-          <h2>Onboarding</h2>
-          <p>Eight steps from recruit to active member. Complete them in order. Progress is saved in your browser.</p>
-        </div>
-        <div class="vactions">
-          <a class="btn btn-outline" href="https://discord.gg/GpSUC73G9c" target="_blank">Join Discord ↗</a>
-          <a class="btn btn-gold" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Register ↗</a>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-h">
-          <div class="name">Progress</div>
-          <span class="badge" id="ob-badge-text">0 of 8 complete</span>
-        </div>
-        <div class="ob-bar" style="height:6px;margin-bottom:16px;"><div class="ob-fill" id="ob-fill2" style="width:0%"></div></div>
-
-        <div class="ob-steps" id="ob-steps-list">
-
-          <!-- Step 1 -->
-          <div class="ob-step" data-step="0">
-            <div class="ob-step-head" onclick="toggleStep(0)">
-              <div class="ob-num">1</div>
-              <div><div class="ob-step-title">Submit Registration Form</div><div class="ob-step-tag">// Action Required — Entry into the system</div></div>
-              <span class="ob-step-arrow">▾</span>
             </div>
-            <div class="ob-step-body">
-              <p>Fill out the New Member Recruit Survey. This is your entry into The Regiment roster. Once submitted, your profile is created in the Master Command Sheet and your status is set to <strong>Pending Onboarding</strong>.</p>
-              <ul class="info-bullets">
-                <li>Your Discord username and gamertag are added to the Master Roster</li>
-                <li>Leadership is notified of your registration</li>
-                <li>You'll receive Discord role assignment</li>
+          </div>
+
+          <div class="rank-row">
+            <div class="rank-badge">E-2</div>
+            <div class="rank-info">
+              <h4>Private First Class (PFC)</h4>
+              <p>3 weeks active as Private. 2 squad trainings, 2 official missions, 60%+ attendance, active in regiment channels, squad cohesion maintained.</p>
+              <div style="margin-top:0.6rem;padding:0.6rem;background:var(--bg);border:1px solid var(--border);font-size:0.75rem;color:var(--cream-dim);">
+                <span style="color:var(--gold);">→ To reach LCPL:</span> 3 weeks as PFC · 3 squad trainings · 2 missions/PVPs · Point Man or 2IC in 2 missions · Complete Combat Basics · Recruit 1 member
+              </div>
+            </div>
+          </div>
+
+          <div class="rank-row">
+            <div class="rank-badge">E-3</div>
+            <div class="rank-info">
+              <h4>Lance Corporal (LCPL)</h4>
+              <p>3 weeks as PFC. Act as Point Man or 2IC in 2 missions. Complete Combat Basics Course or pass competency check. Recruit 1 new member.</p>
+              <div style="margin-top:0.6rem;padding:0.6rem;background:var(--bg);border:1px solid var(--border);font-size:0.75rem;color:var(--cream-dim);">
+                <span style="color:var(--gold);">→ To reach CPL:</span> 30 days as LCPL · FTL in 2 GM/Public missions · 2 Regiment courses · 2 PvP/Major Op events · Co-host 1 squad training ·
+                <a href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank" style="color:var(--gold);">Recruit 2 active members (Recruit Form)</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="rank-row">
+            <div class="rank-badge">E-4</div>
+            <div class="rank-info">
+              <h4>Corporal (CPL)</h4>
+              <p>30 days as LCPL. FTL in 2 missions. Complete 2 Regiment Courses. 2 recruits who stay active 2+ weeks. Co-host 1 squad training. 2 PvP or Major Op events.</p>
+              <div style="margin-top:0.6rem;padding:0.6rem;background:var(--bg);border:1px solid var(--border);font-size:0.75rem;color:var(--cream-dim);">
+                <span style="color:var(--gold);">→ To reach SGT:</span> 30 days as CPL · 3 squad trainings last month · FTL or Squad 2IC in 3+ missions · Leadership Basics Course · 5+ total recruits · Mentor 1 Private
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-title">🎖️ NCO Corps — E-5 through E-9</div>
+        <div class="rank-grid">
+
+          <div class="rank-row nco">
+            <div class="rank-badge">E-5</div>
+            <div class="rank-info">
+              <h4>Sergeant (SGT)</h4>
+              <p>30 days as CPL. Lead as FTL or Squad 2IC in 3+ missions. Complete Leadership Basics Course. 5+ total recruits. Mentor 1 Private through onboarding.</p>
+              <div style="margin-top:0.6rem;padding:0.6rem;background:var(--bg);border:1px solid var(--border);font-size:0.75rem;color:var(--cream-dim);">
+                <span style="color:var(--gold);">→ To reach SSGT:</span> 30 days as SGT · Lead 6+ missions as SL/TL · 9 total recruits · Leadership Course II + Logistics Specialist · 2 NCO meetings in 60 days ·
+                <a href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank" style="color:var(--gold);">Training Tracker</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="rank-row nco">
+            <div class="rank-badge">E-6</div>
+            <div class="rank-info">
+              <h4>Staff Sergeant (SSGT)</h4>
+              <p>30 days as SGT. Lead 6+ missions/PVPs as SL or TL. Manage fireteam of 3+ or host 2+ squad trainings/month for 3 months. 9 total recruits. Squad approval (if SL): 70% with 50% response minimum.</p>
+              <div style="margin-top:0.6rem;padding:0.6rem;background:var(--bg);border:1px solid var(--border);font-size:0.75rem;color:var(--cream-dim);">
+                <span style="color:var(--gold);">→ To reach GYSGT:</span> 45 days as SSGT · Lead 8+ missions as SL or Platoon 2IC · Recon Specialist + GM Module · 12 total recruits · Staff 1 Regiment-wide event · Obtain Regiment responsibility role for 60 days
+              </div>
+            </div>
+          </div>
+
+          <div class="rank-row nco">
+            <div class="rank-badge">E-7</div>
+            <div class="rank-info">
+              <h4>Gunnery Sergeant (GYSGT)</h4>
+              <p>45 days as SSGT. Lead 8+ missions or become Drill Instructor or full-time Recruiter. 2 structured platoon trainings. 12 total recruits. Manage a Regiment responsibility role for 60 days.</p>
+              <div style="margin-top:0.6rem;padding:0.6rem;background:var(--bg);border:1px solid var(--border);font-size:0.75rem;color:var(--cream-dim);">
+                <span style="color:var(--gold);">Roles available:</span>
+                <a href="https://app.smartsheet.com/b/form/284fe01bc85c4e39897aafb56390f729" target="_blank" style="color:var(--gold);">Community Roles</a> ·
+                <a href="https://app.smartsheet.com/b/form/bc91ef071b09426584e17df8a3403564" target="_blank" style="color:var(--gold);">Patreon Roles</a> ·
+                <a href="https://app.smartsheet.com/b/form/7d6ceaa52a3f4aa1b746cd481aef3616" target="_blank" style="color:var(--gold);">Recruiter Form</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="rank-row nco">
+            <div class="rank-badge">E-8</div>
+            <div class="rank-info">
+              <h4>Master Sergeant (MSGT)</h4>
+              <p>60 days as GYSGT. Lead 5+ missions/PVP or 12+ public matches. Host major Regiment training. Hold 3 specialist certifications. GM Module (Proficient). Mentor 2 SSGT/GYSGT. 15+ recruits. Lead 1 Regiment project.</p>
+              <div style="margin-top:0.6rem;padding:0.6rem;background:var(--bg);border:1px solid var(--border);font-size:0.75rem;color:var(--cream-dim);">
+                <span style="color:var(--gold);">Required forms:</span>
+                <a href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank" style="color:var(--gold);">Training Form</a> ·
+                <a href="https://app.smartsheet.com/b/form/00fb6c59bb4d4accab780f6c021f84f3" target="_blank" style="color:var(--gold);">Training Module Form</a> ·
+                <a href="https://app.smartsheet.com/b/form/fff83e1a5e3b404d85e0119c4c76bd53" target="_blank" style="color:var(--gold);">SL Eval Form</a> (80% squad response required if SL)
+              </div>
+            </div>
+          </div>
+
+          <div class="rank-row senior">
+            <div class="rank-badge">E-9</div>
+            <div class="rank-info">
+              <h4>Sergeant Major (SGM)</h4>
+              <p>60 days as MSGT. Lead 12+ missions, 4 PVPs, or 18+ public matches. All basic training courses completed. Promote 2 TLs to SL. 25+ recruits. Manage Discord channel of 40+ squad members + 2 additional channels. 75% squad approval.</p>
+              <div style="margin-top:0.6rem;padding:0.6rem;background:var(--bg);border:1px solid var(--border);font-size:0.75rem;color:var(--cream-dim);">
+                <span style="color:var(--gold);">OR alternative paths:</span> Recruit 32+ members into your squad · OR Host 20+ squad/platoon training sessions (all documented via
+                <a href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank" style="color:var(--gold);">Training Form</a>)
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-title">🏛️ Leadership Paths</div>
+        <div class="two-col" style="margin-bottom:0;">
+          <div style="background:var(--bg2);border:1px solid var(--border);padding:1.2rem;">
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--gold);font-size:1rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.6rem;">Option 1 — Independent Squad</div>
+            <ul class="info-list">
+              <li>8–12 committed members ready</li>
+              <li>Minimum rank of CPL or 45 days in Regiment</li>
+              <li>Create squad identity (name & logo)</li>
+              <li>Not active in another squad</li>
+              <li><a href="https://app.smartsheet.com/b/form/4e8273c375b54029b33a7a5890802427" target="_blank" style="color:var(--gold);">Complete Leadership Application</a></li>
+            </ul>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);padding:1.2rem;">
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--gold);font-size:1rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.6rem;">Option 2 — Fireteam Leader</div>
+            <ul class="info-list">
+              <li>Already part of a squad</li>
+              <li>Minimum rank of LCPL</li>
+              <li>Recruit 3–5 members (all must complete Recruit Form)</li>
+              <li>Coordinate with your current Squad Leader</li>
+              <li>Run operations consistently with your fireteam</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="complete-bar">
+        <div class="complete-left">
+          <strong>Mark as Complete</strong>
+          Check this off once you understand the SMART ranking structure.
+        </div>
+        <button class="btn-complete" id="complete-3" onclick="markComplete(3)">✓ Understood</button>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goToStep(2)">← Previous</button>
+        <button class="btn-nav" onclick="goToStep(4)">Next: Choose Your Path →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Community vs Squad Member -->
+    <div class="step-panel" id="panel-4">
+      <div class="panel-header">
+        <div class="panel-step-tag">// Step 05 — Choose Your Path</div>
+        <div class="panel-title">Squad Member vs <span>Community Member</span></div>
+        <p class="panel-desc">The Regiment welcomes two types of membership. Understanding the difference will help you choose the path that fits your goals and availability.</p>
+      </div>
+
+      <div class="two-col">
+        <div class="content-card" style="margin-bottom:0">
+          <div class="card-title">👥 Community Member</div>
+          <ul class="info-list">
+            <li><strong>Vibrant Community Space</strong> — Connect with Arma players in a welcoming environment</li>
+            <li><strong>Flexible Membership</strong> — Join voice channels, share media, and engage at your own pace</li>
+            <li><strong>Community Growth</strong> — Invite others and expand the network</li>
+            <li><strong>Freedom to Choose</strong> — Participate in squads and events at your own discretion</li>
+            <li>No formal rank obligations or attendance requirements</li>
+            <li>Access to general Discord channels and community events</li>
+          </ul>
+          <div style="margin-top:1.2rem; padding:0.8rem; background:var(--bg2); border:1px solid var(--border); font-size:0.8rem; color:var(--cream-dim); line-height:1.5;">
+            Best for members who want to be part of the community without structured commitments.
+          </div>
+        </div>
+
+        <div class="content-card" style="margin-bottom:0; border-top-color: var(--gold-bright);">
+          <div class="card-title">⚔️ Squad Member</div>
+          <ul class="info-list">
+            <li><strong>Structured Gameplay</strong> — Join a squad for dedicated training, missions, and leadership development</li>
+            <li><strong>Team Collaboration</strong> — Work under experienced squad leaders as a cohesive unit</li>
+            <li><strong>Private Squad Channel</strong> — Access your squad's dedicated channel for strategy and coordination</li>
+            <li><strong>Leadership Advancement</strong> — Progress through ranks and take on leadership roles</li>
+            <li><strong>Role Specialization</strong> — Earn specialized roles and certifications</li>
+            <li>Participate in competitive PVP, GM Missions, and major operations</li>
+          </ul>
+          <div style="margin-top:1.2rem; padding:0.8rem; background:rgba(201,168,76,0.06); border:1px solid var(--border-strong); font-size:0.8rem; color:var(--cream-dim); line-height:1.5;">
+            Best for members who want structure, progression, and a dedicated team.
+          </div>
+        </div>
+      </div>
+
+      <div class="complete-bar">
+        <div class="complete-left">
+          <strong>Mark as Complete</strong>
+          Check this off once you've decided which path is right for you.
+        </div>
+        <button class="btn-complete" id="complete-4" onclick="markComplete(4)">✓ Path Understood</button>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goToStep(3)">← Previous</button>
+        <button class="btn-nav" onclick="goToStep(5)">Next: Squad Structure →</button>
+      </div>
+    </div>
+
+    <!-- STEP 6: Squad Structure -->
+    <div class="step-panel" id="panel-5">
+      <div class="panel-header">
+        <div class="panel-step-tag">// Step 06 — Know Your Unit</div>
+        <div class="panel-title">Lux Platoon & <span>Active Squads</span></div>
+        <p class="panel-desc">The Regiment's operational units fall under Lux Platoon. Each squad has its own identity, style, and focus. Review the structure and active squads below.</p>
+      </div>
+
+      <div class="content-card">
+        <div class="card-title">🏛️ Command Hierarchy</div>
+        <div class="hierarchy">
+          <div class="hier-row">
+            <div class="hier-icon">⭐</div>
+            <div class="hier-label">Commanding Officer (CO)</div>
+            <div class="hier-sub">Commander — @[CO]WSSIWARLORDI</div>
+          </div>
+          <div class="hier-row hier-indent-1">
+            <div class="hier-icon">🎖️</div>
+            <div class="hier-label">Platoon Leader (PL)</div>
+            <div class="hier-sub">Lux Platoon Command</div>
+          </div>
+          <div class="hier-row hier-indent-2">
+            <div class="hier-icon">🔰</div>
+            <div class="hier-label">Squad Leader (SL)</div>
+            <div class="hier-sub">Leads individual squads</div>
+          </div>
+          <div class="hier-row hier-indent-3">
+            <div class="hier-icon">▸</div>
+            <div class="hier-label">Team Leader (TL)</div>
+            <div class="hier-sub">Leads fireteams within squads</div>
+          </div>
+          <div class="hier-row" style="padding-left:7rem;">
+            <div class="hier-icon">·</div>
+            <div class="hier-label">Squad Members</div>
+            <div class="hier-sub">Privates through Corporals</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-title">🛡️ Active Squads & Sub-Units</div>
+        <div class="squad-grid">
+
+          <div class="squad-card">
+            <div class="squad-name">LUX 1-1</div>
+            <div class="squad-tag">// Active — Milsim · Lux Platoon</div>
+            <p class="squad-desc">Focused on milsim-style roles and ranking combined with effective teamwork. If you want earned roles and structured gameplay with real gamers, Lux 1-1 is home.</p>
+            <div style="margin-top:1rem;padding:0.8rem;background:var(--bg);border:1px solid var(--border);">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.5rem;">SUB-SQUADS</div>
+              <ul class="info-list">
+                <li><strong>Reaper Squad</strong> — #reaper-squad</li>
+                <li><strong>Phoenix Squad</strong> — #phoenix-squad-chat</li>
+                <li><strong>Pale Horse Squad</strong> — #pale-horse-squad</li>
               </ul>
-              <div class="ob-step-actions">
-                <a class="btn sm btn-gold" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Open Registration Form ↗</a>
-                <a class="btn sm btn-outline" href="https://discord.gg/GpSUC73G9c" target="_blank">Join Discord ↗</a>
-                <button class="btn sm btn-complete-sm" data-complete="0" onclick="markDone(0)">✓ Mark Complete</button>
-              </div>
             </div>
           </div>
 
-          <!-- Step 2 -->
-          <div class="ob-step" data-step="1">
-            <div class="ob-step-head" onclick="toggleStep(1)">
-              <div class="ob-num">2</div>
-              <div><div class="ob-step-title">Visit the Regiment Website</div><div class="ob-step-tag">// Explore — Familiarize yourself with the hub</div></div>
-              <span class="ob-step-arrow">▾</span>
-            </div>
-            <div class="ob-step-body">
-              <p>Explore theregimenthq.com and all its sections: the main hub, leadership portal, ARCL competitive hub, Patreon dashboard, and this onboarding guide. Know where everything lives before your first session.</p>
-              <div class="ob-step-actions">
-                <a class="btn sm btn-gold" href="https://theregimenthq.com" target="_blank">Visit RegimentHQ ↗</a>
-                <button class="btn sm btn-complete-sm" data-complete="1" onclick="markDone(1)">✓ Mark Complete</button>
-              </div>
+          <div class="squad-card">
+            <div class="squad-name">Last Resort</div>
+            <div class="squad-tag">// Active — Assault</div>
+            <p class="squad-desc">Frontline stormtroopers — first in, last out. For those who enjoy constant coordinated action fighting for liberty. First in, last out.</p>
+            <div style="margin-top:1rem;padding:0.8rem;background:var(--bg);border:1px solid var(--border);">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.5rem;">SUB-SQUADS</div>
+              <ul class="info-list">
+                <li><strong>Oasis Squad</strong> — #oasis-squad</li>
+                <li><strong>Geronimo Squad</strong> — #geronimo-squad</li>
+              </ul>
             </div>
           </div>
 
-          <!-- Step 3 -->
-          <div class="ob-step" data-step="2">
-            <div class="ob-step-head" onclick="toggleStep(2)">
-              <div class="ob-num">3</div>
-              <div><div class="ob-step-title">Read the Code of Conduct</div><div class="ob-step-tag">// Required Reading — In-game and Discord rules</div></div>
-              <span class="ob-step-arrow">▾</span>
-            </div>
-            <div class="ob-step-body">
-              <p><strong>In-Game Rules:</strong> Respectful communication · Positive attitude · Teamwork first · No team killing · No griefing · Constructive criticism · Clear comms · Fair play · Respectful mic usage · Enjoy the game.</p>
-              <p style="margin-top:8px;"><strong>Discord Rules:</strong> Respectful communication · Positive attitude · No slurs · No racist remarks · No griefing · Open to feedback · Communicate effectively · Promote unity · Respect squad mates · Respect leaders.</p>
-              <div class="ob-step-actions">
-                <a class="btn sm btn-outline" href="https://discord.gg/GpSUC73G9c" target="_blank">Read #regiment-rules-and-conduct ↗</a>
-                <button class="btn sm btn-complete-sm" data-complete="2" onclick="markDone(2)">✓ I've Read & Understood</button>
-              </div>
+          <div class="squad-card">
+            <div class="squad-name">Death or Liberty</div>
+            <div class="squad-tag">// Active — Tactical</div>
+            <p class="squad-desc">Excels in outmaneuvering the enemy, strategizing smarter paths to victory, and adapting at every opportunity. Serious enough to win, relaxed enough to enjoy it.</p>
+            <div style="margin-top:1rem;padding:0.8rem;background:var(--bg);border:1px solid var(--border);">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.5rem;">CHANNELS</div>
+              <ul class="info-list">
+                <li>#death-or-liberty-squad</li>
+                <li>#death-or-liberty-important-info</li>
+                <li>#death-or-liberty-leadership</li>
+              </ul>
             </div>
           </div>
 
-          <!-- Step 4 -->
-          <div class="ob-step" data-step="3">
-            <div class="ob-step-head" onclick="toggleStep(3)">
-              <div class="ob-num">4</div>
-              <div><div class="ob-step-title">Understand the SMART Rank System</div><div class="ob-step-tag">// Know Your Path — Activity, Education, Contribution</div></div>
-              <span class="ob-step-arrow">▾</span>
-            </div>
-            <div class="ob-step-body">
-              <p>The Regiment uses the SMART promotion model. Rank is earned through three tracked categories: <strong>Activity</strong> (missions & training attendance), <strong>Education</strong> (completing courses), and <strong>Contribution</strong> (recruiting, peer evaluations, leading events). Type <strong>!rankreview</strong> in Discord when you're ready for a promotion review.</p>
-              <div class="ob-step-actions">
-                <button class="btn sm btn-outline" onclick="goView('ranks')">View Full Rank System →</button>
-                <button class="btn sm btn-complete-sm" data-complete="3" onclick="markDone(3)">✓ Understood</button>
-              </div>
+          <div class="squad-card">
+            <div class="squad-name">Regiment 1 Tactical Group</div>
+            <div class="squad-tag">// Active — R1TG</div>
+            <p class="squad-desc">A tactical group operating within the Regiment structure. Focused on coordinated server operations and structured gameplay within the R1TG framework.</p>
+            <div style="margin-top:1rem;padding:0.8rem;background:var(--bg);border:1px solid var(--border);">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.5rem;">CHANNELS</div>
+              <ul class="info-list">
+                <li>#ServerInfo-Chillsim-R1TG</li>
+                <li>#Rules · #Roster-2-2 · #About-Us</li>
+              </ul>
             </div>
           </div>
 
-          <!-- Step 5 -->
-          <div class="ob-step" data-step="4">
-            <div class="ob-step-head" onclick="toggleStep(4)">
-              <div class="ob-num">5</div>
-              <div><div class="ob-step-title">Community Member vs Squad Member</div><div class="ob-step-tag">// Choose Your Path — Understand your commitment level</div></div>
-              <span class="ob-step-arrow">▾</span>
-            </div>
-            <div class="ob-step-body">
-              <p><strong>Community Member:</strong> Flexible participation. Join voice channels, engage in discussions, invite others, join events at your own pace. No formal rank obligations.</p>
-              <p style="margin-top:8px;"><strong>Squad Member:</strong> Structured gameplay. Join a squad for dedicated training, missions, and leadership development. Earn ranks, specialize in roles, and progress toward leadership positions. Access private squad channels and participate in competitive PVP and GM Missions.</p>
-              <div class="ob-step-actions">
-                <button class="btn sm btn-outline" onclick="goView('squads')">View Active Squads →</button>
-                <button class="btn sm btn-complete-sm" data-complete="4" onclick="markDone(4)">✓ Path Understood</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 6 -->
-          <div class="ob-step" data-step="5">
-            <div class="ob-step-head" onclick="toggleStep(5)">
-              <div class="ob-num">6</div>
-              <div><div class="ob-step-title">Lux Platoon & Squad Structure</div><div class="ob-step-tag">// Know Your Unit — Squads, hierarchy, assignment</div></div>
-              <span class="ob-step-arrow">▾</span>
-            </div>
-            <div class="ob-step-body">
-              <p>The Regiment operates under <strong>Lux Platoon</strong>. Hierarchy runs: CO → Platoon Leader → Squad Leader → Team Leader → Squad Members. Active squads include LUX 1-1 (Reaper, Phoenix, Pale Horse), Last Resort (Oasis, Geronimo), Death or Liberty, and Regiment 1 Tactical Group.</p>
-              <div class="ob-step-actions">
-                <button class="btn sm btn-outline" onclick="goView('squads')">View Full Squad Structure →</button>
-                <button class="btn sm btn-complete-sm" data-complete="5" onclick="markDone(5)">✓ Structure Reviewed</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 7 -->
-          <div class="ob-step" data-step="6">
-            <div class="ob-step-head" onclick="toggleStep(6)">
-              <div class="ob-num">7</div>
-              <div><div class="ob-step-title">Events, Schedule & Discord Navigation</div><div class="ob-step-tag">// Stay Active — Know when and where things happen</div></div>
-              <span class="ob-step-arrow">▾</span>
-            </div>
-            <div class="ob-step-body">
-              <p><strong>Battle Day</strong> — Every Friday (server codes in #server-codes-only). <strong>Game Master Missions</strong> — Saturdays, modded immersive ops. <strong>PVP Events</strong> — Scheduled competitive matches (requires 1–2 training sessions). <strong>Monthly Onboarding</strong> — 5th Sunday of each month. Essential channels: #regiment-announcements, #questions-and-answers, #regiment-forms, #ranks-and-roles, #active-squads.</p>
-              <div class="ob-step-actions">
-                <button class="btn sm btn-outline" onclick="goView('events')">View Events & Channels →</button>
-                <button class="btn sm btn-complete-sm" data-complete="6" onclick="markDone(6)">✓ Events Reviewed</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 8 -->
-          <div class="ob-step" data-step="7">
-            <div class="ob-step-head" onclick="toggleStep(7)">
-              <div class="ob-num">8</div>
-              <div><div class="ob-step-title">Onboarding Presentation & Live Session</div><div class="ob-step-tag">// Final Briefing — Review the deck, attend the session</div></div>
-              <span class="ob-step-arrow">▾</span>
-            </div>
-            <div class="ob-step-body">
-              <p>Review the official Regiment Onboarding Presentation on Canva — it covers mission, values, squads, events, and member expectations. Then attend the live monthly onboarding session (5th Sunday of each month) in the Game Master Briefings voice channel. Questions? Post in <strong>#questions-and-answers</strong> or DM <strong>@[CO]WSSIWARLORDI</strong>.</p>
-              <div class="ob-step-actions">
-                <a class="btn sm btn-gold" href="https://www.canva.com/d/fkjxulyhldhePB6" target="_blank">View Presentation ↗</a>
-                <a class="btn sm btn-outline" href="https://discord.gg/GpSUC73G9c" target="_blank">Open Discord ↗</a>
-                <button class="btn sm btn-complete-sm" data-complete="7" onclick="markDone(7)">✓ Briefing Complete</button>
-              </div>
-            </div>
-          </div>
-
-        </div><!-- /ob-steps -->
-
-        <!-- Completion banner (hidden until all done) -->
-        <div id="ob-complete-banner" style="display:none;margin-top:16px;padding:20px;border-radius:14px;border:1px solid rgba(76,175,122,0.4);background:rgba(76,175,122,0.08);text-align:center;">
-          <div style="font-size:2rem;margin-bottom:8px;">🎖️</div>
-          <div style="font-family:'Rajdhani',sans-serif;font-weight:800;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--complete);margin-bottom:6px;">Onboarding Complete</div>
-          <div style="font-size:13px;color:var(--mid);margin-bottom:14px;">You're cleared to operate. Join the Discord, introduce yourself, and show up on Battle Day.</div>
-          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-            <a class="btn sm btn-gold" href="https://discord.gg/GpSUC73G9c" target="_blank">Join Discord ↗</a>
-            <a class="btn sm btn-outline" href="https://www.patreon.com/c/Regiment1" target="_blank">Explore Patreon ↗</a>
-            <button class="btn sm" onclick="resetOb()">↺ Reset Progress</button>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ═══ RANKS ═══ -->
-    <section class="view" id="view-ranks">
-      <div class="vhead">
-        <div class="vtitle">
-          <div class="eye">// Progression Doctrine</div>
-          <h2>SMART Rank System</h2>
-          <p>Rank is earned, not given. Three categories: Activity, Education, Contribution. Type <strong>!rankreview</strong> in Discord to request a promotion review via MEE6.</p>
-        </div>
-        <div class="vactions">
-          <a class="btn btn-outline" href="https://app.smartsheet.com/b/form/fff83e1a5e3b404d85e0119c4c76bd53" target="_blank">SL Eval Form ↗</a>
-          <button class="btn btn-gold" onclick="goView('training')">Start Trainings</button>
         </div>
       </div>
 
-      <div class="grid g12">
-        <div class="card c12">
-          <div class="card-h"><div class="name">The 3 Promotion Categories</div><span class="badge">SMART Model</span></div>
-          <div class="cards" style="grid-template-columns:repeat(3,1fr);">
-            <div class="mc"><div class="mc-top"><div class="mc-title">🎯 Activity</div><span class="pill">Monthly</span></div><div class="mc-desc">Attendance in missions and training sessions, tracked monthly. Consistency is the baseline for all promotions.</div></div>
-            <div class="mc"><div class="mc-top"><div class="mc-title">📚 Education</div><span class="pill">Courses</span></div><div class="mc-desc">Completing specific courses — Combat Basics, Leadership I &amp; II, Logistics, Recon Specialist, Game Master Module.</div></div>
-            <div class="mc"><div class="mc-top"><div class="mc-title">🤝 Contribution</div><span class="pill">Impact</span></div><div class="mc-desc">Recruiting new members, peer evaluations, leading events, managing squad channels, mentoring junior members.</div></div>
-          </div>
+      <div class="complete-bar">
+        <div class="complete-left">
+          <strong>Mark as Complete</strong>
+          Check this off once you've reviewed the squad structure.
         </div>
+        <button class="btn-complete" id="complete-5" onclick="markComplete(5)">✓ Structure Reviewed</button>
+      </div>
 
-        <div class="card c12">
-          <div class="card-h"><div class="name">Junior Enlisted — E-1 through E-4</div><span class="badge">Foundation</span></div>
-          <div class="rank-grid">
-            <div class="rank-row"><div class="rank-badge">E-1</div><div class="rank-info"><h4>Private</h4><p>Entry rank on squad assignment. Attend 1 mission or training/month. Follow Rules &amp; CoC. Learn movement, comms, and team roles.</p><div class="rank-req">→ To PFC: 3 weeks active · 2 squad trainings + 2 missions · 60%+ attendance · <a href="https://app.smartsheet.com/b/form/fff83e1a5e3b404d85e0119c4c76bd53" target="_blank">SL Eval Form</a> + <a href="https://app.smartsheet.com/b/form/0bb0656f1a51477093facdbc616b737a" target="_blank">Feedback Form</a></div></div></div>
-            <div class="rank-row"><div class="rank-badge">E-2</div><div class="rank-info"><h4>Private First Class (PFC)</h4><p>3 weeks as Private. 2 squad trainings, 2 official missions, SL Eval form, Regiment Feedback form. 60%+ attendance, active in regiment channels.</p><div class="rank-req">→ To LCPL: 3 weeks as PFC · 3 squad trainings · 2 missions/PVPs · Point Man or 2IC in 2 missions · Complete Combat Basics · Recruit 1 member</div></div></div>
-            <div class="rank-row"><div class="rank-badge">E-3</div><div class="rank-info"><h4>Lance Corporal (LCPL)</h4><p>3 weeks as PFC. Act as Point Man or 2IC in 2 missions. Complete Combat Basics Course. Recruit 1 new member.</p><div class="rank-req">→ To CPL: 30 days as LCPL · FTL in 2 GM/Public missions · 2 Regiment courses · 2 PvP events · Co-host 1 training · <a href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Recruit 2 active members</a></div></div></div>
-            <div class="rank-row"><div class="rank-badge">E-4</div><div class="rank-info"><h4>Corporal (CPL)</h4><p>30 days as LCPL. FTL in 2 missions. 2 Regiment Courses. 2 recruits (active 2+ weeks). Co-host 1 training. 2 PvP or Major Op events.</p><div class="rank-req">→ To SGT: 30 days as CPL · 3 squad trainings · FTL/Squad 2IC in 3+ missions · Leadership Basics Course · 5+ total recruits · Mentor 1 Private</div></div></div>
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goToStep(4)">← Previous</button>
+        <button class="btn-nav" onclick="goToStep(6)">Next: Events & Schedule →</button>
+      </div>
+    </div>
+
+    <!-- STEP 7: Events & Discord Navigation -->
+    <div class="step-panel" id="panel-6">
+      <div class="panel-header">
+        <div class="panel-step-tag">// Step 07 — Stay Active</div>
+        <div class="panel-title">Events, Schedule <span>& Discord</span></div>
+        <p class="panel-desc">Know when and where things happen. The Regiment runs a consistent schedule of events across multiple formats — here's what to expect and which Discord channels to follow.</p>
+      </div>
+
+      <div class="content-card">
+        <div class="card-title">📅 Regular Regiment Events</div>
+        <div class="event-grid">
+          <div class="event-card">
+            <div class="event-icon">⚔️</div>
+            <div class="event-name">Battle Day</div>
+            <div class="event-schedule">Every Friday</div>
+            <p class="event-desc">Official coordinated gameplay on the Regiment server. Server codes shared in <strong>#server-codes-only</strong>.</p>
           </div>
-        </div>
-
-        <div class="card c12">
-          <div class="card-h"><div class="name">NCO Corps — E-5 through E-9</div><span class="badge">Leadership</span></div>
-          <div class="rank-grid">
-            <div class="rank-row nco"><div class="rank-badge">E-5</div><div class="rank-info"><h4>Sergeant (SGT)</h4><p>30 days as CPL. Lead as FTL or Squad 2IC in 3+ missions. Leadership Basics Course. 5+ total recruits. Mentor 1 Private through onboarding.</p><div class="rank-req">→ To SSGT: 30 days · Lead 6+ missions as SL/TL · Leadership Course II + Logistics Specialist · 9 recruits · 2 NCO meetings in 60 days · <a href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Training Tracker</a></div></div></div>
-            <div class="rank-row nco"><div class="rank-badge">E-6</div><div class="rank-info"><h4>Staff Sergeant (SSGT)</h4><p>30 days as SGT. Lead 6+ missions/PVPs as SL or TL. Manage fireteam of 3+ or host 2+ trainings/month for 3 months. 9 total recruits. 70% squad approval if SL.</p><div class="rank-req">→ To GYSGT: 45 days · Lead 8+ missions as SL/Platoon 2IC · Recon Specialist + GM Module · 12 recruits · Staff 1 Regiment-wide event · Regiment role for 60 days · <a href="https://app.smartsheet.com/b/form/284fe01bc85c4e39897aafb56390f729" target="_blank">Community Roles</a></div></div></div>
-            <div class="rank-row nco"><div class="rank-badge">E-7</div><div class="rank-info"><h4>Gunnery Sergeant (GYSGT)</h4><p>45 days as SSGT. Lead 8+ missions OR become Drill Instructor OR full-time Recruiter. 2 structured platoon trainings. 12 total recruits. Manage a regiment responsibility role for 60 days.</p><div class="rank-req">Roles: <a href="https://app.smartsheet.com/b/form/284fe01bc85c4e39897aafb56390f729" target="_blank">Community</a> · <a href="https://app.smartsheet.com/b/form/bc91ef071b09426584e17df8a3403564" target="_blank">Patreon</a> · <a href="https://app.smartsheet.com/b/form/7d6ceaa52a3f4aa1b746cd481aef3616" target="_blank">Recruiter Form</a></div></div></div>
-            <div class="rank-row nco"><div class="rank-badge">E-8</div><div class="rank-info"><h4>Master Sergeant (MSGT)</h4><p>60 days as GYSGT. Lead 5+ missions/PVP or 12+ public matches. Host major Regiment training. Hold 3 specialist certifications. GM Module (Proficient). Mentor 2 SSGT/GYSGT. 15+ recruits. Lead 1 Regiment project. 80% squad eval response if SL.</p><div class="rank-req"><a href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Training Form</a> · <a href="https://app.smartsheet.com/b/form/00fb6c59bb4d4accab780f6c021f84f3" target="_blank">Module Form</a> · <a href="https://app.smartsheet.com/b/form/fff83e1a5e3b404d85e0119c4c76bd53" target="_blank">SL Eval</a></div></div></div>
-            <div class="rank-row senior"><div class="rank-badge">E-9</div><div class="rank-info"><h4>Sergeant Major (SGM)</h4><p>60 days as MSGT. Lead 12+ missions, 4 PVPs, or 18+ public matches. All basic courses complete. Promote 2 TLs to SL. 25+ recruits. Manage 40+ member channel + 2 additional channels. 75% squad approval.</p><div class="rank-req">OR: Recruit 32+ members · OR host 20+ training sessions via <a href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Training Form</a></div></div></div>
+          <div class="event-card">
+            <div class="event-icon">🎯</div>
+            <div class="event-name">Game Master Missions</div>
+            <div class="event-schedule">Saturdays</div>
+            <p class="event-desc">Modded, immersive GM-led missions. Work as a team to achieve coordinated objectives.</p>
           </div>
-        </div>
-
-        <div class="card c12">
-          <div class="card-h"><div class="name">Leadership Paths</div><span class="badge">Two Options</span></div>
-          <div class="cards" style="grid-template-columns:1fr 1fr;">
-            <div class="mc"><div class="mc-top"><div class="mc-title">Option 1 — Independent Squad</div><span class="pill">CPL+ Required</span></div><div class="mc-desc">8–12 committed members · Minimum CPL or 45 days in Regiment · Own squad identity (name &amp; logo) · Not active in another squad · Coordinate with current SL if applicable.</div><div class="mc-actions"><a class="btn sm btn-gold" href="https://app.smartsheet.com/b/form/4e8273c375b54029b33a7a5890802427" target="_blank">Leadership Application ↗</a></div></div>
-            <div class="mc"><div class="mc-top"><div class="mc-title">Option 2 — Fireteam Leader</div><span class="pill">LCPL+ Required</span></div><div class="mc-desc">Already in a squad · Minimum LCPL rank · Recruit 3–5 members (all must complete Recruit Form) · Coordinate with your Squad Leader · Run operations consistently with your fireteam.</div><div class="mc-actions"><button class="btn sm btn-outline" onclick="goView('squads')">View Squads →</button></div></div>
+          <div class="event-card">
+            <div class="event-icon">🏆</div>
+            <div class="event-name">PVP Events</div>
+            <div class="event-schedule">Scheduled</div>
+            <p class="event-desc">Compete against other Discord communities. Requires 1–2 training sessions prior. See ARCL for competitive league info.</p>
+          </div>
+          <div class="event-card">
+            <div class="event-icon">🪖</div>
+            <div class="event-name">Monthly Onboarding</div>
+            <div class="event-schedule">5th Sunday of the Month</div>
+            <p class="event-desc">Live onboarding session for new recruits. Attend to get officially introduced to leadership and your squad.</p>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- ═══ RULES ═══ -->
-    <section class="view" id="view-rules">
-      <div class="vhead">
-        <div class="vtitle">
-          <div class="eye">// Discipline & Standards</div>
-          <h2>Rules & Conduct</h2>
-          <p>Standards that apply to every member at all times — in-game and on Discord. Know these before your first op.</p>
-        </div>
-        <div class="vactions">
-          <a class="btn btn-outline" href="https://discord.gg/GpSUC73G9c" target="_blank">#regiment-rules ↗</a>
-        </div>
-      </div>
-
-      <div class="grid g12">
-        <div class="card c6">
-          <div class="card-h"><div class="name">In-Game Rules</div><span class="badge">🎮 Arma</span></div>
-          <div style="margin-top:8px;">
-            <div class="rule-item"><div class="rule-num">01</div><div class="rule-text"><strong>Respectful Communication</strong> — Treat every member with respect at all times.</div></div>
-            <div class="rule-item"><div class="rule-num">02</div><div class="rule-text"><strong>Positive Attitude</strong> — Maintain a constructive mindset in all situations.</div></div>
-            <div class="rule-item"><div class="rule-num">03</div><div class="rule-text"><strong>Teamwork First</strong> — Team success takes priority over individual performance.</div></div>
-            <div class="rule-item"><div class="rule-num">04</div><div class="rule-text"><strong>No Team Killing</strong> — Non-accidental TKing is strictly prohibited.</div></div>
-            <div class="rule-item"><div class="rule-num">05</div><div class="rule-text"><strong>No Griefing</strong> — Disruptive or sabotaging behavior will not be tolerated.</div></div>
-            <div class="rule-item"><div class="rule-num">06</div><div class="rule-text"><strong>Constructive Criticism</strong> — Feedback must be delivered respectfully.</div></div>
-            <div class="rule-item"><div class="rule-num">07</div><div class="rule-text"><strong>Communicate Clearly</strong> — Proper radio discipline and clear callouts required.</div></div>
-            <div class="rule-item"><div class="rule-num">08</div><div class="rule-text"><strong>Fair Play</strong> — Compete and operate with integrity at all times.</div></div>
-            <div class="rule-item"><div class="rule-num">09</div><div class="rule-text"><strong>Respectful Mic Usage</strong> — No excessive noise, music, or interruptions.</div></div>
-            <div class="rule-item"><div class="rule-num">10</div><div class="rule-text"><strong>Enjoy the Game</strong> — This is a community. Have fun.</div></div>
-          </div>
-        </div>
-
-        <div class="card c6">
-          <div class="card-h"><div class="name">Discord Server Rules</div><span class="badge">💬 Community</span></div>
-          <div style="margin-top:8px;">
-            <div class="rule-item"><div class="rule-num">01</div><div class="rule-text"><strong>Respectful Communication</strong> — Same standard applies on Discord as in-game.</div></div>
-            <div class="rule-item"><div class="rule-num">02</div><div class="rule-text"><strong>Positive Attitude</strong> — Keep conversations constructive and uplifting.</div></div>
-            <div class="rule-item"><div class="rule-num">03</div><div class="rule-text"><strong>No Slurs</strong> — Zero tolerance for slurs or derogatory language of any kind.</div></div>
-            <div class="rule-item"><div class="rule-num">04</div><div class="rule-text"><strong>No Racist Remarks</strong> — Racist or discriminatory content results in immediate removal.</div></div>
-            <div class="rule-item"><div class="rule-num">05</div><div class="rule-text"><strong>No Griefing</strong> — Includes trolling, spamming, and disruptive behavior.</div></div>
-            <div class="rule-item"><div class="rule-num">06</div><div class="rule-text"><strong>Open to Feedback</strong> — Accept and give constructive criticism professionally.</div></div>
-            <div class="rule-item"><div class="rule-num">07</div><div class="rule-text"><strong>Communicate Effectively</strong> — Be clear, concise, and on-topic in all channels.</div></div>
-            <div class="rule-item"><div class="rule-num">08</div><div class="rule-text"><strong>Promote Unity</strong> — Support fellow members and contribute to community growth.</div></div>
-            <div class="rule-item"><div class="rule-num">09</div><div class="rule-text"><strong>Respect Squad Mates</strong> — Honor the chain of command and your teammates.</div></div>
-            <div class="rule-item"><div class="rule-num">10</div><div class="rule-text"><strong>Respect Leaders</strong> — Follow the direction of SLs, PLs, and Command.</div></div>
-          </div>
-        </div>
-
-        <div class="card c12">
-          <div class="card-h"><div class="name">SOP Library</div><span class="badge">Expandable</span></div>
-          <div class="accordion" id="sop-acc">
-            <div class="acc"><button type="button"><span>Comms Discipline <span class="acc-mini">// Radio & Callouts</span></span><span>+</span></button><div class="acc-body">Keep comms short, clear, and relevant. No cross-talk during contact. <ul><li>Use callouts: direction, distance, target type, urgency.</li><li>Leader comms take priority over all others.</li><li>Confirm orders with short read-backs.</li><li>No music or excessive noise on mic during ops.</li></ul></div></div>
-            <div class="acc"><button type="button"><span>Chain of Command <span class="acc-mini">// Leadership Structure</span></span><span>+</span></button><div class="acc-body">Orders flow down. Feedback flows up. No freelancing in ops.<ul><li>CO → Platoon Leader → Squad Leader → Team Leader → Operator.</li><li>Squad Lead owns squad execution during ops.</li><li>Fireteam Lead owns movement and contact handling.</li><li>Operators execute, report, and support.</li></ul></div></div>
-            <div class="acc"><button type="button"><span>Mission Conduct <span class="acc-mini">// Professionalism</span></span><span>+</span></button><div class="acc-body">If you sign up, show up. If you can't make it, notify leadership early.<ul><li>Be on time for briefing — late arrivals disrupt the op.</li><li>Follow mission ROE and objectives as briefed.</li><li>No drama during ops — resolve issues through proper channels.</li><li>Submit AAR feedback if requested by leadership.</li></ul></div></div>
-            <div class="acc"><button type="button"><span>Training Expectations <span class="acc-mini">// Growth Culture</span></span><span>+</span></button><div class="acc-body">Training is how we keep quality high and performance consistent.<ul><li>Complete Combat Basics before first deployment — non-negotiable.</li><li>Role certifications are required for specialized role assignments.</li><li>Leaders must maintain attendance and readiness at all times.</li><li>Squad Leaders must host regular training sessions for their unit.</li></ul></div></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ SQUADS ═══ -->
-    <section class="view" id="view-squads">
-      <div class="vhead">
-        <div class="vtitle">
-          <div class="eye">// Unit Order of Battle</div>
-          <h2>Squads & Structure</h2>
-          <p>All active squads under Lux Platoon. Request assignment via the Recruit Form — leadership will route you based on availability and role preference.</p>
-        </div>
-        <div class="vactions">
-          <a class="btn btn-gold" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Request Assignment ↗</a>
-        </div>
-      </div>
-
-      <div class="grid g12">
-        <div class="card c12">
-          <div class="card-h"><div class="name">Command Hierarchy</div><span class="badge">Lux Platoon</span></div>
-          <div class="hier">
-            <div class="hier-row"><div class="hier-ico">⭐</div><div class="hier-label">Commanding Officer (CO)</div><div class="hier-sub">@[CO]WSSIWARLORDI</div></div>
-            <div class="hier-row hi1"><div class="hier-ico">🎖️</div><div class="hier-label">Platoon Leader (PL)</div><div class="hier-sub">Lux Platoon Command</div></div>
-            <div class="hier-row hi2"><div class="hier-ico">🔰</div><div class="hier-label">Squad Leader (SL)</div><div class="hier-sub">Leads individual squads</div></div>
-            <div class="hier-row hi3"><div class="hier-ico">▸</div><div class="hier-label">Team Leader (TL)</div><div class="hier-sub">Leads fireteams within squads</div></div>
-            <div class="hier-row hi4"><div class="hier-ico">·</div><div class="hier-label">Squad Members</div><div class="hier-sub">Privates through Corporals</div></div>
-          </div>
-        </div>
-
-        <div class="card c12">
-          <div class="card-h"><div class="name">Active Squads</div><span class="badge">Recruiting</span></div>
-          <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));">
-
-            <div class="squad-card" data-tags="squad lux 1-1 milsim reaper phoenix pale horse">
-              <div class="sq-name">LUX 1-1</div>
-              <div class="sq-tag">// Active · Milsim · Lux Platoon</div>
-              <div class="sq-desc">Milsim-style roles and ranking combined with effective teamwork. Focused on earned roles and structured gameplay. If you want discipline with the fun of real gamers, Lux 1-1 is home.</div>
-              <div class="sq-subs"><div class="sq-sub-label">Sub-Squads</div><ul><li>Reaper Squad — #reaper-squad</li><li>Phoenix Squad — #phoenix-squad-chat</li><li>Pale Horse Squad — #pale-horse-squad</li></ul></div>
-              <div style="margin-top:10px;"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Request Assignment ↗</a></div>
+      <div class="content-card">
+        <div class="card-title">📡 Essential Discord Channels</div>
+        <div class="channel-grid">
+          <div class="channel-item">
+            <div class="ch-hash">#</div>
+            <div>
+              <div class="ch-name">regiment-announcements</div>
+              <div class="ch-desc">Important updates and news</div>
             </div>
-
-            <div class="squad-card" data-tags="squad last resort assault oasis geronimo frontline">
-              <div class="sq-name">Last Resort</div>
-              <div class="sq-tag">// Active · Assault · Frontline</div>
-              <div class="sq-desc">Frontline stormtroopers — first in, last out. Fighting for freedom and liberation. For those who enjoy constant coordinated action in a strategic manner. Mors Aut Libertas.</div>
-              <div class="sq-subs"><div class="sq-sub-label">Sub-Squads</div><ul><li>Oasis Squad — #oasis-squad</li><li>Geronimo Squad — #geronimo-squad</li></ul></div>
-              <div style="margin-top:10px;"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Request Assignment ↗</a></div>
+          </div>
+          <div class="channel-item">
+            <div class="ch-hash">#</div>
+            <div>
+              <div class="ch-name">recruit-survey</div>
+              <div class="ch-desc">New member registration info</div>
             </div>
-
-            <div class="squad-card" data-tags="squad death or liberty tactical adaptive">
-              <div class="sq-name">Death or Liberty</div>
-              <div class="sq-tag">// Active · Tactical · Adaptive</div>
-              <div class="sq-desc">Excels in outmaneuvering the enemy, strategizing the smarter path to victory, and adapting at every opportunity. Serious enough to win, relaxed enough to enjoy it.</div>
-              <div class="sq-subs"><div class="sq-sub-label">Channels</div><ul><li>#death-or-liberty-squad</li><li>#death-or-liberty-important-info</li><li>#death-or-liberty-leadership</li></ul></div>
-              <div style="margin-top:10px;"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Request Assignment ↗</a></div>
+          </div>
+          <div class="channel-item">
+            <div class="ch-hash">#</div>
+            <div>
+              <div class="ch-name">regiment-onboarding</div>
+              <div class="ch-desc">Getting started with the Regiment</div>
             </div>
-
-            <div class="squad-card" data-tags="squad regiment 1 tactical group R1TG chillsim">
-              <div class="sq-name">Regiment 1 Tactical Group</div>
-              <div class="sq-tag">// Active · R1TG · Coordinated Ops</div>
-              <div class="sq-desc">A tactical group operating within the Regiment structure. Focused on coordinated server operations and structured gameplay under the R1TG framework.</div>
-              <div class="sq-subs"><div class="sq-sub-label">Channels</div><ul><li>#ServerInfo-Chillsim-R1TG</li><li>#Rules · #Roster-2-2 · #About-Us</li></ul></div>
-              <div style="margin-top:10px;"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Request Assignment ↗</a></div>
+          </div>
+          <div class="channel-item">
+            <div class="ch-hash">#</div>
+            <div>
+              <div class="ch-name">regiment-rules-and-conduct</div>
+              <div class="ch-desc">Guidelines and conduct expectations</div>
             </div>
-
+          </div>
+          <div class="channel-item">
+            <div class="ch-hash">#</div>
+            <div>
+              <div class="ch-name">questions-and-answers</div>
+              <div class="ch-desc">Ask questions, get help from leadership</div>
+            </div>
+          </div>
+          <div class="channel-item">
+            <div class="ch-hash">#</div>
+            <div>
+              <div class="ch-name">server-codes-only</div>
+              <div class="ch-desc">Battle Day server codes posted here</div>
+            </div>
+          </div>
+          <div class="channel-item">
+            <div class="ch-hash">#</div>
+            <div>
+              <div class="ch-name">ranks-and-roles</div>
+              <div class="ch-desc">Rank info and role assignment</div>
+            </div>
+          </div>
+          <div class="channel-item">
+            <div class="ch-hash">#</div>
+            <div>
+              <div class="ch-name">active-squads</div>
+              <div class="ch-desc">Current active squads in the Regiment</div>
+            </div>
+          </div>
+          <div class="channel-item">
+            <div class="ch-hash">#</div>
+            <div>
+              <div class="ch-name">regiment-forms</div>
+              <div class="ch-desc">All Regiment forms in one place</div>
+            </div>
+          </div>
+          <div class="channel-item">
+            <div class="ch-hash">#</div>
+            <div>
+              <div class="ch-name">regiment-voting-channel</div>
+              <div class="ch-desc">Participate in Regiment polls</div>
+            </div>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- ═══ EVENTS ═══ -->
-    <section class="view" id="view-events">
-      <div class="vhead">
-        <div class="vtitle">
-          <div class="eye">// Operations Schedule</div>
-          <h2>Events & Discord</h2>
-          <p>Regular Regiment events and the key Discord channels you need to know. Check #regiment-announcements for exact times.</p>
+      <div class="complete-bar">
+        <div class="complete-left">
+          <strong>Mark as Complete</strong>
+          Check this off once you've reviewed events and Discord channels.
         </div>
-        <div class="vactions">
-          <a class="btn btn-gold" href="https://discord.gg/GpSUC73G9c" target="_blank">Open Discord ↗</a>
-        </div>
+        <button class="btn-complete" id="complete-6" onclick="markComplete(6)">✓ Events Reviewed</button>
       </div>
 
-      <div class="card">
-        <div class="card-h"><div class="name">Regular Events</div><span class="badge">Weekly Cadence</span></div>
-        <div class="event-cards">
-          <div class="ev-card"><div class="ev-ico">⚔️</div><div class="ev-name">Battle Day</div><div class="ev-sched">Every Friday</div><div class="ev-desc">Official coordinated gameplay on the Regiment server. Server codes in #server-codes-only.</div></div>
-          <div class="ev-card"><div class="ev-ico">🎯</div><div class="ev-name">Game Master Missions</div><div class="ev-sched">Saturdays</div><div class="ev-desc">Modded, immersive GM-led missions. Work as a team to achieve coordinated objectives.</div></div>
-          <div class="ev-card"><div class="ev-ico">🏆</div><div class="ev-name">PVP Events</div><div class="ev-sched">Scheduled</div><div class="ev-desc">Competitive matches vs other communities. Requires 1–2 training sessions. See ARCL for league info.</div></div>
-          <div class="ev-card"><div class="ev-ico">🪖</div><div class="ev-name">Monthly Onboarding</div><div class="ev-sched">5th Sunday of Month</div><div class="ev-desc">Live onboarding for new recruits. Intro to leadership, Q&amp;A with Command, squad assignment.</div></div>
-        </div>
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goToStep(5)">← Previous</button>
+        <button class="btn-nav" onclick="goToStep(7)">Next: Onboarding Presentation →</button>
+      </div>
+    </div>
+
+    <!-- STEP 8: Onboarding Presentation -->
+    <div class="step-panel" id="panel-7">
+      <div class="panel-header">
+        <div class="panel-step-tag">// Step 08 — Final Briefing</div>
+        <div class="panel-title">Onboarding <span>Presentation & Forms</span></div>
+        <p class="panel-desc">Review the official Regiment Onboarding Presentation and familiarize yourself with all available forms. These are the tools you'll use throughout your time in the Regiment.</p>
       </div>
 
-      <div class="card" style="margin-top:16px;">
-        <div class="card-h"><div class="name">Essential Discord Channels</div><span class="badge">Key Navigation</span></div>
-        <div class="ch-grid">
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">regiment-announcements</div><div class="ch-desc">Important updates and news</div></div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">recruit-survey</div><div class="ch-desc">New member registration</div></div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">regiment-onboarding</div><div class="ch-desc">Getting started resources</div></div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">regiment-rules-and-conduct</div><div class="ch-desc">Guidelines and conduct</div></div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">questions-and-answers</div><div class="ch-desc">Ask questions, get help</div></div><div class="ch-badge">Key</div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">server-codes-only</div><div class="ch-desc">Battle Day server codes</div></div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">regiment-forms</div><div class="ch-desc">All Regiment forms here</div></div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">ranks-and-roles</div><div class="ch-desc">Rank info and role assignment</div></div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">active-squads</div><div class="ch-desc">Current active squads</div></div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">regiment-voting-channel</div><div class="ch-desc">Participate in polls</div></div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">ideas-and-discussions</div><div class="ch-desc">Bring new ideas to Command</div></div></div>
-          <div class="ch-item"><div class="ch-hash">#</div><div><div class="ch-name">regiment-victories</div><div class="ch-desc">Share wins and achievements</div></div></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ TRAINING ═══ -->
-    <section class="view" id="view-training">
-      <div class="vhead">
-        <div class="vtitle">
-          <div class="eye">// Certification Tracks</div>
-          <h2>Trainings</h2>
-          <p>Complete courses to earn certifications and unlock rank promotions. Combat Basics is required before your first op.</p>
-        </div>
-        <div class="vactions">
-          <a class="btn btn-gold" href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Training Sign-Up ↗</a>
-        </div>
+      <div class="presentation-card">
+        <div class="icon">📊</div>
+        <h4>Regiment Onboarding Presentation</h4>
+        <p>The full Regiment onboarding deck — covering our mission, community values, squad structure, events, and what's expected of every member. Review this before attending your first onboarding session.</p>
+        <a href="https://www.canva.com/d/fkjxulyhldhePB6" target="_blank" class="btn-primary" style="display:inline-flex;margin:0 auto;">📊 View Presentation</a>
       </div>
 
-      <div class="card">
-        <div class="card-h"><div class="name">Courses</div><span class="badge">Certification Tracks</span></div>
-        <div class="cards">
-          <div class="mc" data-tags="training combat basics required cert"><div class="mc-top"><div><div class="mc-title">Combat Basics</div><div class="mc-sub">Required before first op</div></div><span class="pill required">Required</span></div><div class="mc-desc">Fireteam movement, comms protocol, weapons safety, tactical basics, and medical fundamentals. Mandatory for E-3 promotion.</div><div class="mc-actions"><a class="btn sm btn-gold" href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Sign Up ↗</a></div></div>
-          <div class="mc" data-tags="training leadership basics course sgt"><div class="mc-top"><div><div class="mc-title">Leadership Basics</div><div class="mc-sub">Required for E-5 SGT</div></div><span class="pill">Leadership</span></div><div class="mc-desc">Core leadership concepts for fireteam and squad management. Required to advance from CPL to SGT.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Sign Up ↗</a></div></div>
-          <div class="mc" data-tags="training leadership course 2 conflict management ssgt"><div class="mc-top"><div><div class="mc-title">Leadership Course II</div><div class="mc-sub">Required for E-6 SSGT</div></div><span class="pill">Leadership</span></div><div class="mc-desc">Conflict &amp; management, advanced squad leadership, accountability, and discipline. Required for SSGT promotion.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Sign Up ↗</a></div></div>
-          <div class="mc" data-tags="training logistics specialist supply vehicles ssgt"><div class="mc-top"><div><div class="mc-title">Logistics Specialist</div><div class="mc-sub">Required for E-6 SSGT</div></div><span class="pill">Role</span></div><div class="mc-desc">Supply chain, vehicle logistics, base procedures, inventory tracking, and resupply operations.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Sign Up ↗</a></div></div>
-          <div class="mc" data-tags="training recon specialist forward observer gysgt"><div class="mc-top"><div><div class="mc-title">Recon Specialist</div><div class="mc-sub">Required for E-7 GYSGT</div></div><span class="pill">Role</span></div><div class="mc-desc">Surveillance, tracking, reporting, forward observer protocol, and intel formatting. Required for GYSGT.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Sign Up ↗</a></div></div>
-          <div class="mc" data-tags="training game master module gm mission design gysgt"><div class="mc-top"><div><div class="mc-title">Game Master Module</div><div class="mc-sub">Required for E-7 GYSGT</div></div><span class="pill">Leadership</span></div><div class="mc-desc">Mission design, balancing, scenario scripting, and player experience management. Leads to GM hosting rights.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Sign Up ↗</a></div></div>
-        </div>
-      </div>
-    </section>
+      <div class="content-card">
+        <div class="card-title">📋 All Regiment Forms</div>
+        <div class="forms-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-top:0.5rem;">
 
-    <!-- ═══ FORMS ═══ -->
-    <section class="view" id="view-forms">
-      <div class="vhead">
-        <div class="vtitle">
-          <div class="eye">// Regiment Forms</div>
-          <h2>All Forms</h2>
-          <p>Every active Smartsheet form for Regiment members. Officer-only forms are marked accordingly.</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-h"><div class="name">Member Forms</div><span class="badge">Smartsheet</span></div>
-        <div class="cards">
-          <div class="mc" data-tags="form recruit survey registration join"><div class="mc-top"><div class="mc-title">Recruit Survey</div><span class="pill">All Members</span></div><div class="mc-desc">Primary entry form. Fills out your Regiment profile and gets you squad-assigned.</div><div class="mc-actions"><a class="btn sm btn-gold" href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank">Open Form ↗</a></div></div>
-          <div class="mc" data-tags="form squad leader evaluation promotion pfc msgt"><div class="mc-top"><div class="mc-title">Squad Leader Evaluation</div><span class="pill">All Members</span></div><div class="mc-desc">Required for E-2 and E-8 promotions. Submit feedback on your Squad Leader's performance.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/fff83e1a5e3b404d85e0119c4c76bd53" target="_blank">Open Form ↗</a></div></div>
-          <div class="mc" data-tags="form regiment feedback general experience promotion pfc"><div class="mc-top"><div class="mc-title">Regiment Feedback Form</div><span class="pill">All Members</span></div><div class="mc-desc">General experience feedback. Required alongside SL Eval for E-2 (PFC) promotion.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/0bb0656f1a51477093facdbc616b737a" target="_blank">Open Form ↗</a></div></div>
-          <div class="mc" data-tags="form training registration sign-up session"><div class="mc-top"><div class="mc-title">Training Registration</div><span class="pill">All Members</span></div><div class="mc-desc">Sign up for Regiment training sessions. Required for rank progression at all levels.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank">Open Form ↗</a></div></div>
-          <div class="mc" data-tags="form leadership application squad independent cpl"><div class="mc-top"><div class="mc-title">Leadership Application</div><span class="pill">All Members</span></div><div class="mc-desc">Apply to create an independent squad or take on a formal leadership role within the Regiment.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/4e8273c375b54029b33a7a5890802427" target="_blank">Open Form ↗</a></div></div>
-          <div class="mc" data-tags="form recruiter regiment official gysgt"><div class="mc-top"><div class="mc-title">Regiment Recruiter Form</div><span class="pill">All Members</span></div><div class="mc-desc">Sign up to become an official Regiment Recruiter. Required for the E-7 Recruiter alternative path.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/7d6ceaa52a3f4aa1b746cd481aef3616" target="_blank">Open Form ↗</a></div></div>
-          <div class="mc" data-tags="form community role coordinator hr instructor onboarding gysgt"><div class="mc-top"><div class="mc-title">Community Role Application</div><span class="pill">All Members</span></div><div class="mc-desc">Apply for a Regiment responsibility role — Coordinator, HR, Instructor, Onboarding, Recruiter. Required for E-7 path.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/284fe01bc85c4e39897aafb56390f729" target="_blank">Open Form ↗</a></div></div>
-          <div class="mc" data-tags="form spotlight nomination monthly recognition"><div class="mc-top"><div class="mc-title">Monthly Spotlight Nomination</div><span class="pill">All Members</span></div><div class="mc-desc">Nominate a deserving member for the monthly Regiment spotlight recognition award.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/9f61277954af4b5db520a26ee424363e" target="_blank">Open Form ↗</a></div></div>
-          <div class="mc" data-tags="form training module creation msgt sgm advanced"><div class="mc-top"><div class="mc-title">Training Module Creation</div><span class="pill">All Members</span></div><div class="mc-desc">Submit a new training module for the Regiment. Required for E-8 MSGT and E-9 SGM promotions.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/00fb6c59bb4d4accab780f6c021f84f3" target="_blank">Open Form ↗</a></div></div>
-          <div class="mc" data-tags="form patreon community role patreon gysgt"><div class="mc-top"><div class="mc-title">Patreon Role Application</div><span class="pill">All Members</span></div><div class="mc-desc">Apply for a Patreon-specific responsibility role within the Regiment structure.</div><div class="mc-actions"><a class="btn sm btn-outline" href="https://app.smartsheet.com/b/form/bc91ef071b09426584e17df8a3403564" target="_blank">Open Form ↗</a></div></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ PATREON ═══ -->
-    <section class="view" id="view-patreon">
-      <div class="vhead">
-        <div class="vtitle">
-          <div class="eye">// Support the Mission</div>
-          <h2>Patreon</h2>
-          <p>Patreon funds servers, events, and the tools that keep the Regiment operational. Two tiers available.</p>
-        </div>
-        <div class="vactions">
-          <a class="btn btn-outline" href="patreon.html">Member Dashboard →</a>
-          <a class="btn btn-gold" href="https://www.patreon.com/c/Regiment1" target="_blank">Join Patreon ↗</a>
-        </div>
-      </div>
-
-      <div class="grid g12">
-        <div class="card c6">
-          <div class="card-h"><div class="name">Sergeant Tier</div><span class="badge">$4.99/month</span></div>
-          <div class="list">
-            <div class="item"><div class="idot"></div><div><div class="it">Patreon-Exclusive Missions</div><div class="id">Access to special ops for Patreon members only.</div></div></div>
-            <div class="item"><div class="idot"></div><div><div class="it">50% Off All Basic Courses</div><div class="id">Save on course fees while advancing your certifications.</div></div></div>
-            <div class="item"><div class="idot"></div><div><div class="it">Static Patreon Profile + PDF Certifications</div><div class="id">Your profile and certs in one place.</div></div></div>
-            <div class="item"><div class="idot"></div><div><div class="it">Podcast Access + Streamer Status</div><div class="id">Participate in podcasts. Grow your Twitch as a Patreon Streamer.</div></div></div>
-            <div class="item"><div class="idot"></div><div><div class="it">Sponsor 1 Non-Patreon Member/Month</div><div class="id">Bring a friend into an exclusive mission slot.</div></div></div>
-            <div class="item"><div class="idot"></div><div><div class="it">Front Row at Leadership Meetings</div><div class="id">See Regiment decisions as they happen.</div></div></div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.4rem;">ALL MEMBERS</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;color:var(--cream);margin-bottom:0.4rem;">Recruit Survey</div>
+            <p style="font-size:0.8rem;color:var(--cream-dim);line-height:1.4;margin-bottom:0.8rem;">Primary form for joining the Regiment and getting squad assigned.</p>
+            <a href="https://app.smartsheet.com/b/form/3ea2bcf4204b489698316c74360d13cf" target="_blank" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;">Open Form →</a>
           </div>
-          <div style="margin-top:14px;"><a class="btn btn-outline" href="https://www.patreon.com/c/Regiment1" target="_blank">Join as Sergeant ↗</a></div>
-        </div>
 
-        <div class="card c6" style="border-color:var(--border-b);background:linear-gradient(160deg,rgba(201,168,76,0.06),var(--bg3));">
-          <div class="card-h"><div class="name">Officer Tier</div><span class="badge">$9.99/month</span></div>
-          <div class="list">
-            <div class="item"><div class="idot"></div><div><div class="it">Everything in Sergeant, plus:</div><div class="id">All Sergeant benefits are included at this tier.</div></div></div>
-            <div class="item"><div class="idot"></div><div><div class="it">Achievement Mural</div><div class="id">Permanent display of awards, medals, and ribbons earned.</div></div></div>
-            <div class="item"><div class="idot"></div><div><div class="it">Video Profile with Soundtrack</div><div class="id">Personalized showcase of your accomplishments.</div></div></div>
-            <div class="item"><div class="idot"></div><div><div class="it">Free Basic Certifications + 50% Off Advanced</div><div class="id">Significant savings on your cert track.</div></div></div>
-            <div class="item"><div class="idot"></div><div><div class="it">Rank Skip — Skip One Rank</div><div class="id">Accelerate your progression in the Regiment system.</div></div></div>
-            <div class="item"><div class="idot"></div><div><div class="it">3 x 1-on-1 Sessions/Month with Commander</div><div class="id">Direct coaching and mentorship from Warlord.</div></div></div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.4rem;">PROMOTION</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;color:var(--cream);margin-bottom:0.4rem;">Squad Leader Evaluation</div>
+            <p style="font-size:0.8rem;color:var(--cream-dim);line-height:1.4;margin-bottom:0.8rem;">Required for E-2 and E-8 promotions. Submit feedback on your squad leader.</p>
+            <a href="https://app.smartsheet.com/b/form/fff83e1a5e3b404d85e0119c4c76bd53" target="_blank" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;">Open Form →</a>
           </div>
-          <div style="margin-top:14px;"><a class="btn btn-gold" href="https://www.patreon.com/c/Regiment1" target="_blank">Join as Officer ↗</a></div>
-        </div>
 
-        <div class="card c12">
-          <div class="card-h"><div class="name">Patreon Member Portal</div><span class="badge">Password Protected</span></div>
-          <div class="list">
-            <div class="item"><div class="idot"></div><div>
-              <div class="it">Exclusive Member Dashboard</div>
-              <div class="id">Access all 8 Patreon forms, exclusive Discord channels, benefits comparison table, and member resources in one password-protected hub.</div>
-              <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
-                <a class="btn sm btn-gold" href="patreon.html">Open Patreon Hub →</a>
-                <a class="btn sm btn-outline" href="https://discord.gg/GpSUC73G9c" target="_blank">Discord — #patreon-members ↗</a>
-              </div>
-            </div></div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.4rem;">PROMOTION</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;color:var(--cream);margin-bottom:0.4rem;">Regiment Feedback Form</div>
+            <p style="font-size:0.8rem;color:var(--cream-dim);line-height:1.4;margin-bottom:0.8rem;">Required for E-2 promotion. Share your general experience with the Regiment.</p>
+            <a href="https://app.smartsheet.com/b/form/0bb0656f1a51477093facdbc616b737a" target="_blank" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;">Open Form →</a>
+          </div>
+
+          <div style="background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.4rem;">TRAINING</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;color:var(--cream);margin-bottom:0.4rem;">Training Registration</div>
+            <p style="font-size:0.8rem;color:var(--cream-dim);line-height:1.4;margin-bottom:0.8rem;">Sign up for Regiment training sessions. Required for rank progression.</p>
+            <a href="https://app.smartsheet.com/b/form/fec021d89860431891256baf180d2607" target="_blank" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;">Open Form →</a>
+          </div>
+
+          <div style="background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.4rem;">LEADERSHIP</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;color:var(--cream);margin-bottom:0.4rem;">Leadership Application</div>
+            <p style="font-size:0.8rem;color:var(--cream-dim);line-height:1.4;margin-bottom:0.8rem;">Apply to create an independent squad or take on a leadership role within the Regiment.</p>
+            <a href="https://app.smartsheet.com/b/form/4e8273c375b54029b33a7a5890802427" target="_blank" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;">Open Form →</a>
+          </div>
+
+          <div style="background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.4rem;">LEADERSHIP</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;color:var(--cream);margin-bottom:0.4rem;">Regiment Recruiter Form</div>
+            <p style="font-size:0.8rem;color:var(--cream-dim);line-height:1.4;margin-bottom:0.8rem;">Sign up to become an official Regiment Recruiter. Required for E-7 Recruiter path.</p>
+            <a href="https://app.smartsheet.com/b/form/7d6ceaa52a3f4aa1b746cd481aef3616" target="_blank" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;">Open Form →</a>
+          </div>
+
+          <div style="background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.4rem;">COMMUNITY</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;color:var(--cream);margin-bottom:0.4rem;">Community Role Application</div>
+            <p style="font-size:0.8rem;color:var(--cream-dim);line-height:1.4;margin-bottom:0.8rem;">Apply for a Regiment responsibility role — Coordinator, HR, Instructor, Onboarding, Recruiter, etc.</p>
+            <a href="https://app.smartsheet.com/b/form/284fe01bc85c4e39897aafb56390f729" target="_blank" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;">Open Form →</a>
+          </div>
+
+          <div style="background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.4rem;">COMMUNITY</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;color:var(--cream);margin-bottom:0.4rem;">Monthly Spotlight Nomination</div>
+            <p style="font-size:0.8rem;color:var(--cream-dim);line-height:1.4;margin-bottom:0.8rem;">Nominate a deserving member for the monthly Regiment spotlight recognition.</p>
+            <a href="https://app.smartsheet.com/b/form/9f61277954af4b5db520a26ee424363e" target="_blank" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;">Open Form →</a>
+          </div>
+
+          <div style="background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.2rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.4rem;">ADVANCED</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;color:var(--cream);margin-bottom:0.4rem;">Training Module Creation</div>
+            <p style="font-size:0.8rem;color:var(--cream-dim);line-height:1.4;margin-bottom:0.8rem;">Required for E-8 and E-9 promotions. Submit a new training module for the Regiment.</p>
+            <a href="https://app.smartsheet.com/b/form/00fb6c59bb4d4accab780f6c021f84f3" target="_blank" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;">Open Form →</a>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-title">🪖 Live Onboarding Event</div>
+        <div class="card-body">
+          <ul class="info-list">
+            <li><strong>When:</strong> Fifth Sunday of each month</li>
+            <li><strong>Where:</strong> Regiment Discord — Game Master Briefings voice channel</li>
+            <li><strong>What to expect:</strong> Introduction to leadership, Q&A with Command, squad assignment confirmation</li>
+            <li>Check <strong>#regiment-announcements</strong> for the next scheduled session date</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-title">❓ Questions?</div>
+        <div class="card-body">
+          <ul class="info-list">
+            <li>Post in <strong>#questions-and-answers</strong> on Discord for community Q&A</li>
+            <li>DM the Commander directly: <strong>@[CO]WSSIWARLORDI</strong></li>
+            <li>Type <strong>!rankreview</strong> in Discord to trigger a promotion review via MEE6</li>
+            <li>Check <strong>#regiment-forms</strong> for all forms in one Discord channel</li>
+          </ul>
+          <div style="margin-top:1.2rem;">
+            <a href="https://discord.gg/GpSUC73G9c" target="_blank" class="btn-outline">Open Discord →</a>
           </div>
         </div>
       </div>
-    </section>
 
-  </div><!-- /content -->
-  <div class="footer">The Regiment · Arma Reforger Milsim · discord.gg/GpSUC73G9c · theregimenthq.com · © 2026</div>
-</main>
+      <div class="complete-bar">
+        <div class="complete-left">
+          <strong>Mark as Complete</strong>
+          Check this off after reviewing the presentation and all available forms.
+        </div>
+        <button class="btn-complete" id="complete-7" onclick="markComplete(7)">✓ Briefing Complete</button>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-nav" onclick="goToStep(6)">← Previous</button>
+        <button class="btn-nav" onclick="goToStep(8)">Finish Onboarding →</button>
+      </div>
+    </div>
+
+    <!-- COMPLETION SCREEN -->
+    <div class="step-panel" id="panel-8">
+      <div class="welcome-hero">
+        <div class="welcome-icon">🎖️</div>
+        <h2>Welcome to <span>The Regiment</span></h2>
+        <p>You've completed the onboarding process. You're now cleared to operate within the Regiment. Join the Discord, introduce yourself in your squad channel, and show up ready on Battle Day.</p>
+        <div class="welcome-links">
+          <a href="https://discord.gg/GpSUC73G9c" target="_blank" class="btn-primary">Join the Discord</a>
+          <a href="https://theregimenthq.com" class="btn-outline">Go to Member Hub</a>
+          <a href="patreon.html" class="btn-outline">Explore Patreon</a>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top:2rem;">
+        <div class="content-card" style="margin-bottom:0; text-align:center;">
+          <div class="card-title">🎯 Your Next Steps</div>
+          <ul class="info-list" style="text-align:left;">
+            <li>Attend the next live onboarding session (5th Sunday)</li>
+            <li>Introduce yourself in <strong>#the-regiment-chatter</strong></li>
+            <li>Get your squad assignment from a Squad Leader</li>
+            <li>Sign up for your first training session via the Training Registration Form</li>
+            <li>Complete Combat Basics to advance from Private to Lance Corporal</li>
+          </ul>
+        </div>
+        <div class="content-card" style="margin-bottom:0; text-align:center;">
+          <div class="card-title">🔗 Quick Links</div>
+          <ul class="info-list" style="text-align:left;">
+            <li><a href="https://discord.gg/GpSUC73G9c" target="_blank" style="color:var(--gold);">Discord Server</a></li>
+            <li><a href="https://www.patreon.com/c/Regiment1" target="_blank" style="color:var(--gold);">Patreon Membership</a></li>
+            <li><a href="arcl.html" style="color:var(--gold);">ARCL PVP Hub</a></li>
+            <li><a href="https://regiment-discord-shop.fourthwall.com" target="_blank" style="color:var(--gold);">Regiment Merch Store</a></li>
+            <li><a href="https://www.canva.com/d/fkjxulyhldhePB6" target="_blank" style="color:var(--gold);">Onboarding Presentation</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-nav" style="margin-top:2rem;">
+        <button class="btn-nav" onclick="goToStep(7)">← Review Presentation</button>
+        <span></span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Mobile bottom nav -->
+<div class="mobile-steps">
+  <button class="btn-nav" id="mob-prev" onclick="mobilePrev()">← Prev</button>
+  <span id="mob-label" style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--gold);text-transform:uppercase;"></span>
+  <button class="btn-nav" id="mob-next" onclick="mobileNext()">Next →</button>
 </div>
 
 <script>
-/* ─── Navigation ─── */
-const navBtns = [...document.querySelectorAll('.nav-btn')];
-const views = [...document.querySelectorAll('.view')];
+const STEPS = [
+  { title: 'Registration Form', tag: 'Action Required' },
+  { title: 'Visit the Website', tag: 'Explore' },
+  { title: 'Code of Conduct', tag: 'Required Reading' },
+  { title: 'Ranking System', tag: 'Know Your Path' },
+  { title: 'Community vs Squad', tag: 'Choose Your Path' },
+  { title: 'Squad Structure', tag: 'Know Your Unit' },
+  { title: 'Events & Discord', tag: 'Stay Active' },
+  { title: 'Onboarding Presentation', tag: 'Final Briefing' },
+];
 
-function goView(name){
-  views.forEach(v=>v.classList.remove('active'));
-  const t=document.getElementById('view-'+name);
-  if(t) t.classList.add('active');
-  navBtns.forEach(b=>b.classList.remove('active'));
-  const b=navBtns.find(b=>b.dataset.view===name);
-  if(b) b.classList.add('active');
-  const ph={overview:'Rules · Ranks · Resources · Trainings · Ops',onboarding:'Step-by-Step Recruit Process',ranks:'SMART Promotion System — E-1 to E-9',rules:'Code of Conduct & SOPs',squads:'Active Units — Lux Platoon',events:'Events & Discord Channels',training:'Certification Tracks',forms:'All Regiment Forms',patreon:'Membership Tiers & Benefits'};
-  document.querySelector('.page-title .h').textContent='Command Hub';
-  document.querySelector('.page-title .s').textContent=ph[name]||'';
-  document.getElementById('sidebar').classList.remove('open');
-  window.scrollTo({top:0,behavior:'smooth'});
-  filterSearch(document.getElementById('search').value);
+const TOTAL = STEPS.length;
+let currentStep = 0;
+
+function loadProgress() {
+  const saved = localStorage.getItem('regiment-onboarding-v2');
+  return saved ? JSON.parse(saved) : Array(TOTAL).fill(false);
 }
-navBtns.forEach(b=>{ if(b.dataset.view) b.addEventListener('click',()=>goView(b.dataset.view)); });
 
-/* ─── Mobile Sidebar ─── */
-const sidebar=document.getElementById('sidebar');
-document.getElementById('sidebarToggle').addEventListener('click',()=>sidebar.classList.toggle('open'));
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') sidebar.classList.remove('open'); });
-
-/* ─── Mode Toggle ─── */
-const modeSw=document.getElementById('modeSw');
-const modeText=document.getElementById('modeText');
-const wNew=document.getElementById('w-new');
-const wMember=document.getElementById('w-member');
-
-function setMode(isMember){
-  modeSw.classList.toggle('on',isMember);
-  modeSw.setAttribute('aria-checked',String(isMember));
-  modeText.textContent=isMember?'Member':'New Member';
-  if(wNew) wNew.style.display=isMember?'none':'block';
-  if(wMember) wMember.style.display=isMember?'block':'none';
-  document.getElementById('announceMsg').innerHTML=isMember
-    ?'Member focus: review <b>Ranks</b>, check <b>Ops Schedule</b>, keep trainings current. Type <b>!rankreview</b> in Discord when you\'re ready.'
-    :'Battle Day runs every Friday. Monthly Onboarding is held on the 5th Sunday — check <b>#regiment-announcements</b> for details.';
-  localStorage.setItem('rg_member',isMember?'1':'0');
+function saveProgress(progress) {
+  localStorage.setItem('regiment-onboarding-v2', JSON.stringify(progress));
 }
-modeSw.addEventListener('click',()=>setMode(!modeSw.classList.contains('on')));
-modeSw.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); setMode(!modeSw.classList.contains('on')); }});
-setMode(localStorage.getItem('rg_member')==='1');
 
-/* ─── Overview Checklist ─── */
-const ckKey='rg_ov_checks';
-const ckSaved=JSON.parse(localStorage.getItem(ckKey)||'{}');
-document.querySelectorAll('#overviewChecklist input').forEach(cb=>{
-  const id=cb.dataset.ck;
-  cb.checked=!!ckSaved[id];
-  cb.addEventListener('change',()=>{ ckSaved[id]=cb.checked; localStorage.setItem(ckKey,JSON.stringify(ckSaved)); });
-});
+let progress = loadProgress();
 
-/* ─── Onboarding Steps ─── */
-const OB_KEY='rg_ob_steps';
-let obDone=JSON.parse(localStorage.getItem(OB_KEY)||'[]');
+function buildSidebar() {
+  const list = document.getElementById('step-list');
+  list.innerHTML = '';
+  STEPS.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = `step-item${i === currentStep ? ' active' : ''}${progress[i] ? ' done' : ''}`;
+    item.onclick = () => goToStep(i);
+    item.innerHTML = `
+      <div class="step-num"><div class="step-num-inner">${progress[i] ? '✓' : (i + 1)}</div></div>
+      <div class="step-text">
+        <div class="step-title">${s.title}</div>
+        <div class="step-tag">// ${s.tag}</div>
+      </div>`;
+    list.appendChild(item);
+  });
 
-function updateObUI(){
-  const total=8;
-  const count=obDone.filter(Boolean).length;
-  const pct=Math.round(count/total*100);
-  // main progress
-  ['ob-fill','ob-fill2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.width=pct+'%'; });
-  const ct=document.getElementById('ob-count'); if(ct) ct.textContent=count+'/'+total;
-  const bt=document.getElementById('ob-badge-text'); if(bt) bt.textContent=count+' of '+total+' complete';
-  // sidebar progress show/hide
-  const sp=document.getElementById('ob-sidebar-progress'); if(sp) sp.style.display=count>0?'block':'none';
-  // step classes
-  document.querySelectorAll('.ob-step').forEach((el,i)=>{
-    el.classList.toggle('done',!!obDone[i]);
-    const num=el.querySelector('.ob-num');
-    if(num) num.textContent=obDone[i]?'✓':(i+1);
-    const btn=el.querySelector('[data-complete]');
-    if(btn){
-      if(obDone[i]){ btn.textContent='✓ Completed'; btn.classList.add('done'); btn.disabled=true; }
-      else{ btn.textContent='✓ Mark Complete'; btn.classList.remove('done'); btn.disabled=false; }
+  // completion entry
+  const done = document.createElement('div');
+  done.className = `step-item${currentStep === TOTAL ? ' active' : ''}`;
+  done.onclick = () => goToStep(TOTAL);
+  done.innerHTML = `
+    <div class="step-num"><div class="step-num-inner">${currentStep === TOTAL ? '★' : '✦'}</div></div>
+    <div class="step-text">
+      <div class="step-title">Welcome to the Regiment</div>
+      <div class="step-tag">// Completion</div>
+    </div>`;
+  list.appendChild(done);
+}
+
+function updateSegments() {
+  const done = progress.filter(Boolean).length;
+  const pct = Math.round((done / TOTAL) * 100);
+  document.querySelectorAll('.seg-block').forEach((b, i) => {
+    b.classList.remove('lit','half-lit');
+    if (i < done) b.classList.add('lit');
+    else if (i === done && done < TOTAL) b.classList.add('half-lit');
+  });
+  const ptxt = document.getElementById('seg-pct-txt');
+  if (ptxt) ptxt.textContent = pct + '%';
+  const st = document.getElementById('sys-status-txt');
+  if (st) {
+    if (done === 0) st.textContent = 'AWAITING INPUT';
+    else if (done < 4) st.textContent = 'ONBOARDING ACTIVE';
+    else if (done < 8) st.textContent = 'PROCESSING DATA';
+    else st.textContent = 'CLEARANCE GRANTED';
+  }
+}
+
+function addBrackets() {
+  document.querySelectorAll('.content-card').forEach(card => {
+    if (!card.querySelector('.card-brk-tr')) {
+      const tr = document.createElement('div'); tr.className = 'card-brk-tr';
+      const bl = document.createElement('div'); bl.className = 'card-brk-bl';
+      card.appendChild(tr); card.appendChild(bl);
     }
   });
-  // completion banner
-  const banner=document.getElementById('ob-complete-banner');
-  if(banner) banner.style.display=count===total?'block':'none';
 }
 
-function markDone(i){
-  obDone[i]=true;
-  localStorage.setItem(OB_KEY,JSON.stringify(obDone));
-  updateObUI();
-  // auto-open next step
-  setTimeout(()=>{
-    if(i+1<8){
-      document.querySelectorAll('.ob-step')[i].classList.remove('open');
-      const next=document.querySelectorAll('.ob-step')[i+1];
-      next.classList.add('open','active');
-      next.scrollIntoView({behavior:'smooth',block:'center'});
+function updateCoords() {
+  const coords = [
+    '35°48\'22\"N · 14°30\'41\"E',
+    '36°05\'11\"N · 14°14\'29\"E',
+    '35°54\'03\"N · 14°26\'51\"E',
+    '35°47\'38\"N · 14°31\'14\"E',
+    '35°51\'44\"N · 14°28\'37\"E',
+    '35°49\'12\"N · 14°29\'55\"E',
+    '35°52\'28\"N · 14°27\'43\"E',
+    '35°50\'00\"N · 14°30\'00\"E'
+  ];
+  const lat = document.getElementById('coord-lat');
+  const lon = document.getElementById('coord-lon');
+  const stp = document.getElementById('coord-step');
+  if (!lat) return;
+  if (currentStep < TOTAL) {
+    const parts = coords[currentStep].split(' · ');
+    lat.textContent = 'LAT: ' + parts[0];
+    lon.textContent = 'LON: ' + (parts[1]||'---');
+    stp.textContent = 'PHASE: ' + String(currentStep+1).padStart(2,'0') + '/0' + TOTAL;
+  } else {
+    lat.textContent = 'LAT: 35°50\'00\"N';
+    lon.textContent = 'LON: 14°30\'00\"E';
+    stp.textContent = 'PHASE: COMPLETE';
+  }
+}
+
+function updateProgress() {
+  updateSegments();
+}
+
+function updateCompleteButtons() {
+  STEPS.forEach((_, i) => {
+    const btn = document.getElementById('complete-' + i);
+    if (!btn) return;
+    if (progress[i]) {
+      btn.textContent = '✓ Completed';
+      btn.classList.add('completed');
+      btn.disabled = true;
     }
-  },500);
+  });
 }
 
-function resetOb(){
-  if(!confirm('Reset all onboarding progress?')) return;
-  obDone=[];
-  localStorage.removeItem(OB_KEY);
-  updateObUI();
+function goToStep(n) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  currentStep = n;
+  buildSidebar();
+  updateProgress();
+  updateCoords();
+  updateMobileNav();
+  setTimeout(addBrackets, 50);
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
-function toggleStep(i){
-  const steps=document.querySelectorAll('.ob-step');
-  const step=steps[i];
-  const isOpen=step.classList.contains('open');
-  // close all
-  steps.forEach(s=>{ s.classList.remove('open','active'); });
-  if(!isOpen){ step.classList.add('open','active'); }
+function markComplete(i) {
+  progress[i] = true;
+  saveProgress(progress);
+  updateCompleteButtons();
+  updateSegments();
+  buildSidebar();
+  setTimeout(() => { if (i < TOTAL) goToStep(i + 1); }, 650);
 }
+
+function resetProgress() {
+  if (!confirm('Reset all onboarding progress?')) return;
+  progress = Array(TOTAL).fill(false);
+  saveProgress(progress);
+  goToStep(0);
+  updateCompleteButtons();
+}
+
+function updateMobileNav() {
+  const lbl = document.getElementById('mob-label');
+  lbl.textContent = currentStep < TOTAL ? `Step ${currentStep + 1} of ${TOTAL}` : 'Complete';
+  document.getElementById('mob-prev').disabled = currentStep === 0;
+  document.getElementById('mob-next').disabled = currentStep === TOTAL;
+}
+
+function mobilePrev() { if (currentStep > 0) goToStep(currentStep - 1); }
+function mobileNext() { if (currentStep < TOTAL) goToStep(currentStep + 1); }
 
 // init
-if(obDone.length<8) obDone=Array.from({length:8},(v,i)=>obDone[i]||false);
-updateObUI();
-// auto-open first incomplete step
-const firstIncomplete=[...document.querySelectorAll('.ob-step')].findIndex((_,i)=>!obDone[i]);
-if(firstIncomplete>=0) document.querySelectorAll('.ob-step')[firstIncomplete].classList.add('open','active');
-
-/* ─── Accordion ─── */
-document.querySelectorAll('#sop-acc .acc button').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const wrap=btn.closest('.acc');
-    const isOpen=wrap.classList.contains('open');
-    document.querySelectorAll('#sop-acc .acc').forEach(a=>{ a.classList.remove('open'); a.querySelector('button').lastElementChild.textContent='+'; });
-    if(!isOpen){ wrap.classList.add('open'); btn.lastElementChild.textContent='−'; }
-  });
-});
-
-/* ─── Search ─── */
-function filterSearch(q){
-  const activeView=document.querySelector('.view.active');
-  if(!activeView) return;
-  const sq=q.trim().toLowerCase();
-  const candidates=activeView.querySelectorAll('[data-tags], .mc, .squad-card, .item');
-  if(!sq){ candidates.forEach(el=>el.style.display=''); return; }
-  candidates.forEach(el=>{
-    const tags=(el.getAttribute('data-tags')||'').toLowerCase();
-    const text=(el.innerText||'').toLowerCase();
-    el.style.display=(tags.includes(sq)||text.includes(sq))?'':'none';
-  });
-}
-document.getElementById('search').addEventListener('input',e=>filterSearch(e.target.value));
+addBrackets();
+buildSidebar();
+updateProgress();
+updateCoords();
+updateCompleteButtons();
+updateMobileNav();
 </script>
+
 </body>
 </html>
