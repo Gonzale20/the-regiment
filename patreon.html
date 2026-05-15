@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Regiment — Support the FOB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #030e05;
+      --bg2:         #060f07;
+      --bg3:         #091409;
+      --bg4:         #0c1c0d;
+      --gold:        #C9A84C;
+      --gold-dim:    #7a6228;
+      --gold-mid:    #a8883c;
+      --gold-bright: #e8c86a;
+      --gold-glow:   rgba(201,168,76,0.35);
+      --gold-glow-sm:rgba(201,168,76,0.1);
+      --cream:       #f0e8d0;
+      --cream-dim:   #9a8e72;
+      --cream-faint: #504838;
+      --border:      rgba(201,168,76,0.18);
+      --border-mid:  rgba(201,168,76,0.38);
+      --border-hot:  rgba(201,168,76,0.65);
+      --complete:    #4ccc82;
+      --complete-glow: rgba(76,204,130,0.22);
+      --red:         #c94c4c;
+      --nav-h:       58px;
+      --brk:         10px;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Exo 2', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(3,14,5,0.96);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+      backdrop-filter: blur(6px);
+    }
+    .nav-brand {
+      font-family: Rajdhani, sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .nav-center {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.12em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--complete);
+      box-shadow: 0 0 6px var(--complete);
+      animation: pulse 2.5s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.4; }
+    }
+    .nav-right { display: flex; gap: 20px; align-items: center; }
+    .nav-right a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--cream-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-right a:hover, .nav-right a.active { color: var(--gold); }
+
+    .vignette {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 3px);
+    }
+
+    #coord-readout {
+      position: fixed;
+      bottom: 10px; right: 14px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--gold-dim);
+      opacity: 0.55;
+      z-index: 150;
+      letter-spacing: 0.08em;
+    }
+
+    .page {
+      margin-top: var(--nav-h);
+      min-height: calc(100vh - var(--nav-h));
+      padding: 48px 24px 80px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 48px 0 40px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+    .hero-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      color: var(--gold-mid);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-family: Rajdhani, sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      color: var(--gold-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .hero p {
+      font-size: 1rem;
+      color: var(--cream-dim);
+      max-width: 600px;
+      margin: 0 auto 24px;
+      line-height: 1.7;
+    }
+    .hero-badge {
+      display: inline-block;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      color: var(--complete);
+      border: 1px solid var(--complete-glow);
+      padding: 4px 12px;
+      border-radius: 3px;
+      background: rgba(76,204,130,0.06);
+    }
+
+    .section-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-label::before { content: '[ '; }
+    .section-label::after  { content: ' ]'; }
+
+    .fob-block {
+      background: var(--bg2);
+      border: 1px solid var(--border-mid);
+      border-left: 3px solid var(--gold);
+      border-radius: var(--brk);
+      padding: 28px 32px;
+      margin-bottom: 48px;
+    }
+    .fob-block h2 {
+      font-family: Rajdhani, sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+    }
+    .fob-block p { color: var(--cream-dim); line-height: 1.75; margin-bottom: 10px; }
+    .fob-block p:last-child { margin-bottom: 0; }
+    .fob-block strong { color: var(--cream); }
+
+    .tiers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    @media (max-width: 640px) { .tiers-grid { grid-template-columns: 1fr; } }
+
+    .tier-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--brk);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .tier-card:hover { border-color: var(--border-mid); }
+    .tier-card.featured { border-color: var(--border-mid); box-shadow: 0 0 24px rgba(201,168,76,0.08); }
+
+    .tier-header {
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg3);
+    }
+    .tier-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.16em;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .tier-name {
+      font-family: Rajdhani, sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .tier-price { font-family: 'Share Tech Mono', monospace; font-size: 1.1rem; color: var(--cream); margin-top: 4px; }
+    .tier-price span { font-size: 0.72rem; color: var(--cream-faint); margin-left: 4px; }
+    .tier-subtitle { font-size: 0.82rem; color: var(--cream-dim); margin-top: 6px; font-style: italic; }
+
+    .tier-body { padding: 22px 24px; }
+    .tier-body ul { list-style: none; margin-bottom: 22px; }
+    .tier-body ul li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(201,168,76,0.06);
+      font-size: 0.9rem;
+      color: var(--cream-dim);
+      line-height: 1.5;
+    }
+    .tier-body ul li:last-child { border-bottom: none; }
+    .tier-body ul li::before { content: '\25B8'; color: var(--gold-mid); font-size: 0.75rem; flex-shrink: 0; margin-top: 3px; }
+    .tier-body ul li strong { color: var(--cream); }
+
+    .tier-cta {
+      display: block;
+      text-align: center;
+      padding: 11px 20px;
+      background: transparent;
+      border: 1px solid var(--border-mid);
+      border-radius: 5px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .tier-cta:hover { background: var(--gold-glow-sm); border-color: var(--border-hot); }
+    .tier-cta.primary { background: rgba(201,168,76,0.12); border-color: var(--gold); }
+    .tier-cta.primary:hover { background: rgba(201,168,76,0.22); }
+
+    .funds-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    @media (max-width: 640px) { .funds-grid { grid-template-columns: 1fr 1fr; } }
+    .fund-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--brk);
+      padding: 18px 16px;
+      text-align: center;
+    }
+    .fund-icon { font-size: 1.4rem; margin-bottom: 8px; }
+    .fund-label { font-family: Rajdhani, sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--cream); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .fund-desc { font-size: 0.78rem; color: var(--cream-faint); line-height: 1.5; }
+
+    .steps-list { counter-reset: steps; list-style: none; margin-bottom: 48px; }
+    .steps-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .steps-list li:last-child { border-bottom: none; }
+    .step-num {
+      flex-shrink: 0;
+      width: 32px; height: 32px;
+      background: var(--bg3);
+      border: 1px solid var(--border-mid);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--gold);
+    }
+    .step-num::before { content: counter(steps, decimal-leading-zero); }
+    .step-content h4 { font-family: Rajdhani, sans-serif; font-size: 1rem; font-weight: 600; color: var(--cream); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .step-content p { font-size: 0.85rem; color: var(--cream-dim); line-height: 1.6; }
+
+    .bottom-cta {
+      text-align: center;
+      padding: 48px 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--brk);
+      background: var(--bg2);
+    }
+    .bottom-cta h2 { font-family: Rajdhani, sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+    .bottom-cta p { color: var(--cream-dim); max-width: 500px; margin: 0 auto 28px; font-size: 0.95rem; line-height: 1.7; }
+    .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-block;
+      padding: 13px 28px;
+      background: rgba(201,168,76,0.15);
+      border: 1px solid var(--gold);
+      border-radius: 5px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-bright);
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: rgba(201,168,76,0.28); }
+    .btn-secondary {
+      display: inline-block;
+      padding: 13px 28px;
+      background: transparent;
+      border: 1px solid var(--border-mid);
+      border-radius: 5px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      text-decoration: none;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-secondary:hover { color: var(--cream); border-color: var(--border-hot); }
+
+    .notice { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--gold-dim); text-align: center; margin-top: 32px; letter-spacing: 0.08em; opacity: 0.65; }
+  </style>
+</head>
+<body>
+
+<div class="vignette"></div>
+<div id="coord-readout">FOB // PATREON SECTOR</div>
+
+<nav>
+  <a href="https://theregimenthq.com" class="nav-brand">The Regiment</a>
+  <div class="nav-center">
+    <div class="nav-status-dot"></div>
+    <span>SYSTEM ONLINE</span>
+  </div>
+  <div class="nav-right">
+    <a href="https://theregimenthq.com">Hub</a>
+    <a href="patreon.html" class="active">Patreon</a>
+    <a href="https://discord.gg/GpSUC73G9c" target="_blank">Discord</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-tag">Support Structure // Forward Operating Base</div>
+    <h1>Fund the Mission.<br>Build the Regiment.</h1>
+    <p>The Regiment operates on discipline, dedication, and the collective investment of its members. Patreon is the FOB — the logistical backbone that keeps servers running, missions funded, and the community growing.</p>
+    <div class="hero-badge">ACTIVE — PATREON.COM/C/REGIMENT1</div>
+  </div>
+
+  <div class="fob-block">
+    <h2>This is not a tip jar.</h2>
+    <p>Every operation requires resources. Servers don't run on goodwill. Missions don't build themselves. A growing military simulation community demands infrastructure — and infrastructure demands investment.</p>
+    <p>When you support through Patreon, you're not donating to a creator. You're <strong>funding an operational structure</strong>. Your contribution goes directly toward server upkeep, mission development, training resources, event production, and the long-term expansion of The Regiment's capabilities.</p>
+    <p>Patrons are not subscribers. They are <strong>sustainers</strong>. The difference matters.</p>
+  </div>
+
+  <div class="section-label">SUPPORT TIERS // ACTIVE DOCTRINE</div>
+  <div class="tiers-grid">
+
+    <div class="tier-card">
+      <div class="tier-header">
+        <div class="tier-tag">Tier I &mdash; Entry Support</div>
+        <div class="tier-name">Sergeant</div>
+        <div class="tier-price">$4.99 <span>/ month</span></div>
+        <div class="tier-subtitle">&ldquo;Patron&rdquo; &mdash; You are part of the foundation.</div>
+      </div>
+      <div class="tier-body">
+        <ul>
+          <li><strong>Patron</strong> role in Discord &mdash; recognized across all channels</li>
+          <li>Access to <strong>#patreon-supporters</strong> &mdash; the Patron-only channel</li>
+          <li>Monthly <strong>behind-the-scenes</strong> leadership updates</li>
+          <li><strong>Priority signup</strong> for limited-slot operations</li>
+          <li>Recognition in the <strong>monthly Regiment brief</strong></li>
+          <li>Early access to <strong>mission trailers</strong> before public release</li>
+          <li>Voting voice on <strong>community polls</strong> and decisions</li>
+        </ul>
+        <a href="https://www.patreon.com/c/Regiment1" target="_blank" class="tier-cta">Join at Sergeant &rarr;</a>
+      </div>
+    </div>
+
+    <div class="tier-card featured">
+      <div class="tier-header">
+        <div class="tier-tag">Tier II &mdash; Sustained Operations</div>
+        <div class="tier-name">Officer</div>
+        <div class="tier-price">$9.99 <span>/ month</span></div>
+        <div class="tier-subtitle">&ldquo;Sustainer&rdquo; &mdash; You shape what the Regiment becomes.</div>
+      </div>
+      <div class="tier-body">
+        <ul>
+          <li><strong>All Sergeant tier benefits</strong> included</li>
+          <li>Quarterly <strong>Patron-exclusive missions</strong> &mdash; closed to the public</li>
+          <li>Static <strong>Patron profile page</strong> on the Regiment website</li>
+          <li>Direct input on <strong>quarterly campaign storylines</strong></li>
+          <li>Custom <strong>callsign emblem</strong> within brand standards</li>
+          <li><strong>Sustainer badge</strong> on all Regiment dashboards</li>
+          <li>Annual <strong>Patron commendation</strong> entry on the Wall of Honor</li>
+        </ul>
+        <a href="https://www.patreon.com/c/Regiment1" target="_blank" class="tier-cta primary">Join at Officer &rarr;</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">WHERE YOUR SUPPORT GOES</div>
+  <div class="funds-grid">
+    <div class="fund-item">
+      <div class="fund-icon">&#x1F5A5;&#xFE0F;</div>
+      <div class="fund-label">Servers</div>
+      <div class="fund-desc">Dedicated infrastructure for operations and training</div>
+    </div>
+    <div class="fund-item">
+      <div class="fund-icon">&#x1F5FA;&#xFE0F;</div>
+      <div class="fund-label">Missions</div>
+      <div class="fund-desc">Mission design, custom maps, and campaign development</div>
+    </div>
+    <div class="fund-item">
+      <div class="fund-icon">&#x1F393;</div>
+      <div class="fund-label">Training</div>
+      <div class="fund-desc">Academy resources, courses, and certification structure</div>
+    </div>
+    <div class="fund-item">
+      <div class="fund-icon">&#x1F4CA;</div>
+      <div class="fund-label">Systems</div>
+      <div class="fund-desc">Dashboards, rosters, automation tools, and operations infrastructure</div>
+    </div>
+    <div class="fund-item">
+      <div class="fund-icon">&#x1F3AC;</div>
+      <div class="fund-label">Media</div>
+      <div class="fund-desc">Trailers, recruitment content, and community media production</div>
+    </div>
+    <div class="fund-item">
+      <div class="fund-icon">&#x1F4C8;</div>
+      <div class="fund-label">Growth</div>
+      <div class="fund-desc">Recruitment, events, and long-term expansion of the community</div>
+    </div>
+  </div>
+
+  <div class="section-label">ONBOARDING FLOW // WHAT HAPPENS WHEN YOU JOIN</div>
+  <ol class="steps-list">
+    <li>
+      <div class="step-num"></div>
+      <div class="step-content">
+        <h4>Subscribe on Patreon</h4>
+        <p>Choose Sergeant or Officer tier at patreon.com/c/Regiment1. Your support activates immediately.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num"></div>
+      <div class="step-content">
+        <h4>Role Assigned in Discord</h4>
+        <p>Leadership assigns your Patron or Sustainer role. You gain access to the #patreon-supporters channel and all tier benefits.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num"></div>
+      <div class="step-content">
+        <h4>Personal Welcome from Command</h4>
+        <p>Within 72 hours, you receive a direct welcome from Warlord. You're not just a subscriber &mdash; you're recognized by name.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num"></div>
+      <div class="step-content">
+        <h4>First Exclusive Content Drop</h4>
+        <p>Within 14 days, your first patron-exclusive content is delivered &mdash; behind-the-scenes updates, mission teasers, or campaign briefings depending on the active cycle.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num"></div>
+      <div class="step-content">
+        <h4>Officer Tier: Profile Page Built</h4>
+        <p>Officer-tier Sustainers receive a static profile page on the Regiment website. Your callsign, rank, and contribution are part of the permanent record.</p>
+      </div>
+    </li>
+  </ol>
+
+  <div class="bottom-cta">
+    <h2>The FOB Needs You.</h2>
+    <p>The Regiment is only as capable as the infrastructure behind it. Every Patron strengthens the foundation. Choose your tier and take your place on the support line.</p>
+    <div class="cta-row">
+      <a href="https://www.patreon.com/c/Regiment1" target="_blank" class="btn-primary">Support on Patreon &rarr;</a>
+      <a href="https://discord.gg/GpSUC73G9c" target="_blank" class="btn-secondary">Join Discord First</a>
+    </div>
+  </div>
+
+  <p class="notice">THE REGIMENT // PATREON SUPPORT STRUCTURE // ALL TIERS ACTIVE</p>
+
+</div>
+</body>
+</html>
